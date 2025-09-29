@@ -6,13 +6,13 @@ import {
 } from "react";
 import {motion} from "motion/react";
 import Editor, {type OnMount} from "@monaco-editor/react";
-import {useIsMac} from "./CodeEditor";
 import {AnalyseIcon} from "../../assets/imageComponents/AnalyseIcon";
 import {detectMonacoLanguage} from "../../lib/codeDetect";
 import {LanguageIcon} from "../../assets/imageComponents/LanguageIcon";
 import {analyzeCssString} from "../../lib/analyseCSS";
 import {useNavigate} from "react-router-dom";
 import type {BaselineMinLevel} from "../../lib/BaseLineChecker";
+import {useIsMac} from "../../hooks/useIsMac";
 
 type Monaco = typeof import("monaco-editor");
 

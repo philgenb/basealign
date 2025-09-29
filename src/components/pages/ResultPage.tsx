@@ -1,158 +1,272 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import React, {useMemo, useState} from "react";
+import {useLocation, useNavigate} from "react-router-dom";
 import type {BaselineIssue, BaselineReport} from "../../lib/BaseLineChecker";
+import {IssuesTable, type ScoredIssue} from "../results/IssuesTables";
 
 type Severity = "critical" | "moderate";
-type ScoredIssue = BaselineIssue & { severity: Severity; score: number };
 
 function computeSeverity(issue: BaselineIssue): { severity: Severity; score: number } {
-  // BaselineChecker only records issues that are below the chosen minimum.
-  // So only 'false' or 'low' can appear here.
-  if (issue.detectedBaseline === false) return { severity: "critical", score: 2 };
-  return { severity: "moderate", score: 1 };
+    // Only 'false' or 'low' appear as issues (below min)
+    if (issue.detectedBaseline === false) return {severity: "critical", score: 2};
+    return {severity: "moderate", score: 1};
 }
 
-function SeverityBadge({ s }: { s: Severity }) {
-  const styles =
-    s === "critical"
-      ? "bg-red-100 text-red-700 border-red-200"
-      : "bg-amber-100 text-amber-700 border-amber-200";
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold ${styles}`}>
-      {s === "critical" ? "Critical" : "Moderate"}
+function ScoreGauge({score}: { score: number }) {
+    // Simple conic gauge
+    const pct = Math.max(0, Math.min(100, Math.round(score)));
+    const color = pct >= 85 ? "#22c55e" : pct >= 70 ? "#f59e0b" : "#ef4444";
+    const bg = `conic-gradient(${color} ${pct * 3.6}deg, #e5e7eb 0deg)`;
+    return (
+        <div className="flex items-center justify-center h-28 w-28 rounded-full" style={{background: bg}}>
+            <div className="h-24 w-24 rounded-full bg-white flex items-center justify-center shadow-inner">
+                <div className="text-xl font-bold text-slate-800">{pct}%</div>
+            </div>
+        </div>
+    );
+}
+
+function BrowserBadge({name}: { name: "chrome" | "firefox" | "safari" }) {
+    const map = {
+        chrome: {label: "Chrome", bg: "bg-emerald-50", text: "text-emerald-700"},
+        firefox: {label: "Firefox", bg: "bg-orange-50", text: "text-orange-700"},
+        safari: {label: "Safari", bg: "bg-sky-50", text: "text-sky-700"},
+    } as const;
+    const {label, bg, text} = map[name];
+    return (
+        <span
+            className={`inline-flex items-center rounded-lg border border-black/10 px-3 py-1 text-xs font-semibold ${bg} ${text}`}>
+      {label}
     </span>
-  );
+    );
 }
 
 export default function ResultPage() {
-  const location = useLocation();
-  const navigate = useNavigate();
+    const location = useLocation();
+    const navigate = useNavigate();
 
-  const state = location.state as
-    | { report?: BaselineReport; sourceSnippet?: string }
-    | undefined;
+    const state = location.state as
+        | { report?: BaselineReport; sourceSnippet?: string }
+        | undefined;
 
-  if (!state?.report) {
-    return (
-      <div className="min-h-screen w-full bg-gradient-to-b from-white to-slate-50">
-        <div className="max-w-5xl mx-auto px-6 py-12">
-          <h1 className="text-2xl font-bold text-slate-800">No results yet</h1>
-          <p className="mt-2 text-slate-600">Run an analysis from the editor first.</p>
-          <button
-            onClick={() => navigate("/")}
-            className="mt-6 rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white"
-          >
-            Back to Editor
-          </button>
-        </div>
-      </div>
+    if (!state?.report) {
+        return (
+            <div className="min-h-screen w-full bg-gradient-to-b from-white to-slate-50">
+                <div className="max-w-5xl mx-auto px-6 py-12">
+                    <h1 className="text-2xl font-bold text-slate-800">No results yet</h1>
+                    <p className="mt-2 text-slate-600">Run an analysis from the editor first.</p>
+                    <button
+                        onClick={() => navigate("/")}
+                        className="mt-6 rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white"
+                    >
+                        Back to Editor
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const {report, sourceSnippet = ""} = state;
+
+    // Score issues and sort
+    const scoredAll: ScoredIssue[] = useMemo(
+        () =>
+            report.issues
+                .map((iss) => ({...iss, ...computeSeverity(iss)}))
+                .sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score; // critical first
+                    const la = a.loc?.line ?? 0, lb = b.loc?.line ?? 0;
+                    if (la !== lb) return la - lb;
+                    const ca = a.loc?.column ?? 0, cb = b.loc?.column ?? 0;
+                    return ca - cb;
+                }),
+        [report.issues]
     );
-  }
 
-  const { report } = state;
+    const counts = useMemo(() => {
+        let errors = 0, warnings = 0;
+        for (const i of scoredAll) {
+            if (i.severity === "critical") {
+                errors++;
+            } else {
+                warnings++;
+            }
+        }
+        return {errors, warnings};
+    }, [scoredAll]);
 
-  // Enrich & sort by severity, then by location (line/column)
-  const scored: ScoredIssue[] = report.issues
-    .map((iss) => ({ ...iss, ...computeSeverity(iss) }))
-    .sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score; // critical first
-      const la = a.loc?.line ?? 0, lb = b.loc?.line ?? 0;
-      if (la !== lb) return la - lb;
-      const ca = a.loc?.column ?? 0, cb = b.loc?.column ?? 0;
-      return ca - cb;
-    });
+    // Simple scoring heuristic (tunable): 100 - (errors*3 + warnings*2)
+    const overallScore = Math.max(0, 100 - (counts.errors * 3 + counts.warnings * 2));
 
-  const baselineLabel = report.minLevel === "high" ? "High" : "Low";
+    // Filter for the issues table
+    const [filter, setFilter] = useState<"all" | "errors" | "warnings">("all");
+    const filtered = useMemo(() => {
+        if (filter === "all") return scoredAll;
+        if (filter === "errors") return scoredAll.filter((i) => i.severity === "critical");
+        return scoredAll.filter((i) => i.severity === "moderate");
+    }, [filter, scoredAll]);
 
-  return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-white to-slate-50">
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Analysis Results</h1>
-            <p className="mt-1 text-sm text-slate-600">
-              Input language: <span className="font-medium">{report.inputLanguage}</span> ·
-              Minimum Baseline: <span className="font-medium">{baselineLabel}</span>
-            </p>
-            <p className="mt-2 text-sm text-slate-600">
-              Checked: <span className="font-medium">{report.summary.totalChecked}</span> ·
-              Below min level: <span className="font-medium">{report.summary.belowMinLevel}</span>
-            </p>
-          </div>
+    const baselineLabel = report.minLevel === "high" ? "High" : "Low";
 
-          <button
-            onClick={() => navigate("/")}
-            className="shrink-0 rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
-          >
-            Back to Editor
-          </button>
+    // Derive “problematic with” based on support maps (missing entries)
+    const problematic = useMemo(() => {
+        const browsers: Array<"chrome" | "firefox" | "safari"> = [];
+        const check = (name: "chrome" | "firefox" | "safari") => {
+            if (!browsers.includes(name)) browsers.push(name);
+        };
+        for (const i of scoredAll) {
+            const s = i.support ?? {};
+            if (s.chrome == null) check("chrome");
+            if (s.firefox == null) check("firefox");
+            if (s.safari == null && s.safari_ios == null) check("safari");
+        }
+        return browsers;
+    }, [scoredAll]);
+
+    // Create short infringement bullet points from BCD keys
+    const infringementBullets = useMemo(() => {
+        const uniq = new Map<string, ScoredIssue>();
+        for (const i of scoredAll) {
+            if (!uniq.has(i.bcdKey)) uniq.set(i.bcdKey, i);
+        }
+        return [...uniq.values()].slice(0, 4).map((i) => {
+            const label = i.value ? `${i.property}: ${i.value}` : i.property;
+            return `${label} — ${i.bcdKey}`;
+        });
+    }, [scoredAll]);
+
+    const copySnippet = async () => {
+        try {
+            await navigator.clipboard.writeText(sourceSnippet);
+        } catch {
+            // no-op
+        }
+    };
+
+    return (
+        <div className="min-h-screen w-full bg-gradient-to-b from-white to-slate-50">
+            <div className="max-w-6xl mx-auto px-6 py-10">
+                {/* Top header */}
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Analysis</h1>
+                        <p className="mt-1 text-sm text-slate-600">
+                            Input language: <span className="font-medium">{report.inputLanguage}</span> ·
+                            Minimum Baseline: <span className="font-medium">{baselineLabel}</span>
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => navigate("/")}
+                        className="shrink-0 rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
+                    >
+                        Back to Editor
+                    </button>
+                </div>
+
+                {/* Cards row */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Left card: message + counts + filter + copy */}
+                    <div className="md:col-span-2 rounded-2xl border border-black/10 bg-white shadow-sm p-6">
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <div className="text-lg font-semibold text-slate-800">
+                                    {counts.errors + counts.warnings === 0
+                                        ? "This code snippet already looks very solid!"
+                                        : "We found some opportunities to improve compatibility."}
+                                </div>
+                                <div className="mt-3 flex items-center gap-3 text-sm">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-red-100 text-red-700 px-3 py-1">
+                    <span className="h-2 w-2 rounded-full bg-red-500"></span>
+                      {counts.errors} Errors
+                  </span>
+                                    <span
+                                        className="inline-flex items-center gap-2 rounded-full bg-amber-100 text-amber-700 px-3 py-1">
+                    <span className="h-2 w-2 rounded-full bg-amber-500"></span>
+                                        {counts.warnings} Warnings
+                  </span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={copySnippet}
+                                    className="rounded-md border border-black/10 bg-slate-50 px-3 py-2 text-xs font-semibold hover:bg-slate-100"
+                                    title="Copy code"
+                                >
+                                    Code
+                                </button>
+                                <select
+                                    className="rounded-md border border-black/10 bg-white px-3 py-2 text-xs"
+                                    value={filter}
+                                    onChange={(e) => setFilter(e.target.value as any)}
+                                    title="Filter issues"
+                                >
+                                    <option value="all">All</option>
+                                    <option value="errors">Errors</option>
+                                    <option value="warnings">Warnings</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right card: score */}
+                    <div
+                        className="rounded-2xl border border-black/10 bg-white shadow-sm p-6 flex items-center justify-between">
+                        <div>
+                            <div className="text-sm text-slate-500">Overall Score</div>
+                            <div className="mt-1 text-[0px]" aria-hidden/>
+                        </div>
+                        <ScoreGauge score={overallScore}/>
+                    </div>
+                </div>
+
+                {/* Diff-ish card */}
+                <div className="mt-6 rounded-2xl border border-black/10 bg-white shadow-sm p-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div className="text-sm font-semibold text-slate-600 mb-2">Current</div>
+                            <pre
+                                className="text-xs leading-5 bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto">
+                {sourceSnippet || "/* No source code provided */"}
+              </pre>
+                        </div>
+                        <div>
+                            <div className="text-sm font-semibold text-slate-600 mb-2">Recommendation</div>
+                            <pre
+                                className="text-xs leading-5 bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto">
+                {/* For now, mirror. Hook in your fixer later */}
+                                {sourceSnippet || "/* Suggestions will appear here */"}
+              </pre>
+                        </div>
+                    </div>
+
+                    {/* Infringement + Problematic with */}
+                    <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div className="text-sm font-semibold text-slate-700">Infringement</div>
+                            <ul className="mt-2 list-disc pl-5 text-sm text-slate-700">
+                                {infringementBullets.length === 0 ? (
+                                    <li>No notable incompatibilities detected.</li>
+                                ) : (
+                                    infringementBullets.map((t, i) => <li key={i}>{t}</li>)
+                                )}
+                            </ul>
+                        </div>
+                        <div>
+                            <div className="text-sm font-semibold text-slate-700">Problematic with</div>
+                            <div className="mt-2 flex items-center gap-2">
+                                {problematic.length === 0 ? (
+                                    <span className="text-sm text-slate-600">No major browser risks.</span>
+                                ) : (
+                                    problematic.map((b) => <BrowserBadge key={b} name={b}/>)
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bottom: the extracted issues table */}
+                <IssuesTable issues={filtered}/>
+            </div>
         </div>
-
-        {/* Issues table */}
-        <div className="mt-8 overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50/80">
-              <tr className="text-slate-600">
-                <th className="px-4 py-3 font-semibold">Severity</th>
-                <th className="px-4 py-3 font-semibold">Location</th>
-                <th className="px-4 py-3 font-semibold">Kind</th>
-                <th className="px-4 py-3 font-semibold">Property</th>
-                <th className="px-4 py-3 font-semibold">Value</th>
-                <th className="px-4 py-3 font-semibold">BCD key</th>
-                <th className="px-4 py-3 font-semibold">Feature</th>
-                <th className="px-4 py-3 font-semibold">Detected Baseline</th>
-                <th className="px-4 py-3 font-semibold">Support (major)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {scored.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="px-4 py-6 text-center text-slate-500">
-                    No issues found below the chosen minimum baseline.
-                  </td>
-                </tr>
-              ) : (
-                scored.map((iss, i) => (
-                  <tr key={`${iss.bcdKey}-${iss.loc?.line}-${iss.loc?.column}-${i}`} className="border-t">
-                    <td className="px-4 py-2 align-top">
-                      <SeverityBadge s={iss.severity} />
-                    </td>
-                    <td className="px-4 py-2 align-top">
-                      {iss.loc ? `L${iss.loc.line}:C${iss.loc.column}` : "—"}
-                    </td>
-                    <td className="px-4 py-2 align-top">{iss.kind}</td>
-                    <td className="px-4 py-2 align-top font-mono">{iss.property}</td>
-                    <td className="px-4 py-2 align-top font-mono">{iss.value ?? "—"}</td>
-                    <td className="px-4 py-2 align-top font-mono text-[12px]">{iss.bcdKey}</td>
-                    <td className="px-4 py-2 align-top text-[12px]">{iss.featureId ?? "—"}</td>
-                    <td className="px-4 py-2 align-top">
-                      <span className="rounded bg-slate-100 px-2 py-0.5 text-xs">
-                        {String(iss.detectedBaseline)}
-                      </span>
-                      <div className="mt-1 text-[11px] text-slate-500">
-                        {iss.baselineHighDate && <>high: {iss.baselineHighDate} </>}
-                        {iss.baselineLowDate && <>· low: {iss.baselineLowDate}</>}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 align-top text-[12px]">
-                      {iss.support
-                        ? Object.entries(iss.support)
-                            .slice(0, 6)
-                            .map(([br, v]) => `${br}:${v}`)
-                            .join(" · ")
-                        : "—"}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Optional: raw JSON for debugging */}
-        {/* <pre className="mt-6 text-xs bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto">
-          {JSON.stringify(report, null, 2)}
-        </pre> */}
-      </div>
-    </div>
-  );
+    );
 }
