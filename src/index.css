@@ -20,3 +20,16 @@ body,
   background-attachment: fixed;
   background-repeat: no-repeat;
 }
+
+@theme {
+  /* Fonts */
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-outfit: "Outfit", sans-serif;
+
+  /* Shadows */
+  --shadow-card: 0 0 15px 0 rgba(123, 150, 232, 0.12);
+
+  /* Border */
+  --color-card: #E5E7EB;
+}

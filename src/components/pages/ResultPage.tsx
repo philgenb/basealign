@@ -2,6 +2,8 @@ import React, {useMemo, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import type {BaselineIssue, BaselineReport} from "../../lib/BaseLineChecker";
 import {IssuesTable, type ScoredIssue} from "../results/IssuesTables";
+import {ScoreCard} from "../results/ScoreCard";
+import {BrowserBadge} from "../results/BrowserBadge";
 
 type Severity = "critical" | "moderate";
 
@@ -9,35 +11,6 @@ function computeSeverity(issue: BaselineIssue): { severity: Severity; score: num
     // Only 'false' or 'low' appear as issues (below min)
     if (issue.detectedBaseline === false) return {severity: "critical", score: 2};
     return {severity: "moderate", score: 1};
-}
-
-function ScoreGauge({score}: { score: number }) {
-    // Simple conic gauge
-    const pct = Math.max(0, Math.min(100, Math.round(score)));
-    const color = pct >= 85 ? "#22c55e" : pct >= 70 ? "#f59e0b" : "#ef4444";
-    const bg = `conic-gradient(${color} ${pct * 3.6}deg, #e5e7eb 0deg)`;
-    return (
-        <div className="flex items-center justify-center h-28 w-28 rounded-full" style={{background: bg}}>
-            <div className="h-24 w-24 rounded-full bg-white flex items-center justify-center shadow-inner">
-                <div className="text-xl font-bold text-slate-800">{pct}%</div>
-            </div>
-        </div>
-    );
-}
-
-function BrowserBadge({name}: { name: "chrome" | "firefox" | "safari" }) {
-    const map = {
-        chrome: {label: "Chrome", bg: "bg-emerald-50", text: "text-emerald-700"},
-        firefox: {label: "Firefox", bg: "bg-orange-50", text: "text-orange-700"},
-        safari: {label: "Safari", bg: "bg-sky-50", text: "text-sky-700"},
-    } as const;
-    const {label, bg, text} = map[name];
-    return (
-        <span
-            className={`inline-flex items-center rounded-lg border border-black/10 px-3 py-1 text-xs font-semibold ${bg} ${text}`}>
-      {label}
-    </span>
-    );
 }
 
 export default function ResultPage() {
@@ -165,7 +138,7 @@ export default function ResultPage() {
                 {/* Cards row */}
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Left card: message + counts + filter + copy */}
-                    <div className="md:col-span-2 rounded-2xl border border-black/10 bg-white shadow-sm p-6">
+                    <div className="md:col-span-2 rounded-2xl border border-card shadow-card bg-white  p-6">
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <div className="text-lg font-semibold text-slate-800">
@@ -189,13 +162,13 @@ export default function ResultPage() {
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={copySnippet}
-                                    className="rounded-md border border-black/10 bg-slate-50 px-3 py-2 text-xs font-semibold hover:bg-slate-100"
+                                    className="rounded-md border border-card shadow-card bg-slate-50 px-3 py-2 text-xs font-semibold hover:bg-slate-100"
                                     title="Copy code"
                                 >
                                     Code
                                 </button>
                                 <select
-                                    className="rounded-md border border-black/10 bg-white px-3 py-2 text-xs"
+                                    className="rounded-md border border-card shadow-card bg-white px-3 py-2 text-xs"
                                     value={filter}
                                     onChange={(e) => setFilter(e.target.value as any)}
                                     title="Filter issues"
@@ -209,18 +182,18 @@ export default function ResultPage() {
                     </div>
 
                     {/* Right card: score */}
-                    <div
-                        className="rounded-2xl border border-black/10 bg-white shadow-sm p-6 flex items-center justify-between">
-                        <div>
-                            <div className="text-sm text-slate-500">Overall Score</div>
-                            <div className="mt-1 text-[0px]" aria-hidden/>
-                        </div>
-                        <ScoreGauge score={overallScore}/>
-                    </div>
+                    <ScoreCard
+                            score={overallScore}
+                            segments={[
+                                {color: "#ff7072", value: counts.errors * 3},   // rot für Errors
+                                {color: "#ffdb70", value: counts.warnings * 2}, // orange für Warnings
+                                {color: "#5cbc4b", value: Math.max(0, 100 - (counts.errors * 3 + counts.warnings * 2))} // grün = Rest
+                            ]}
+                    />
                 </div>
 
                 {/* Diff-ish card */}
-                <div className="mt-6 rounded-2xl border border-black/10 bg-white shadow-sm p-6">
+                <div className="mt-6 rounded-2xl border border-card shadow-card bg-white p-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
                             <div className="text-sm font-semibold text-slate-600 mb-2">Current</div>

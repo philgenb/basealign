@@ -1,15 +1,13 @@
-// src/pages/LandingPage.tsx
 import React, { useEffect, useRef, useState } from "react";
-import { useIsMac } from "../input/CodeEditor";
 import { BaseAlignIcon } from "../../assets/imageComponents/BaseAlignIcon";
 import { CodeEditorMonaco } from "../input/CodeDetailedEditor";
+import {useIsMac} from "../../hooks/useIsMac";
 
 const LandingPage: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [expanded, setExpanded] = useState<boolean>(false);
   const isMac = useIsMac();
 
-  // kleine API vom Editor zum Fokussieren
   const editorApiRef = useRef<{ focus: () => void } | null>(null);
 
   useEffect(() => {
@@ -27,12 +25,9 @@ const LandingPage: React.FC = () => {
       setExpanded(true);
       setCode((prev) => (prev ? `${prev}\n${text}` : text));
 
-      // Editor nach dem Rendern fokussieren
       requestAnimationFrame(() => {
-        // primär über die API
         editorApiRef.current?.focus();
 
-        // Fallback (z. B. wenn API noch nicht gesetzt)
         const el = document.querySelector<HTMLElement>("[aria-label='Monaco code editor']");
         el?.focus();
       });
