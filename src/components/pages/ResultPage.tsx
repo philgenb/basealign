@@ -4,6 +4,7 @@ import type {BaselineIssue, BaselineReport} from "../../lib/BaseLineChecker";
 import {IssuesTable, type ScoredIssue} from "../results/IssuesTables";
 import {ScoreCard} from "../results/ScoreCard";
 import {BrowserBadge} from "../results/BrowserBadge";
+import {IssueBadge} from "../results/IssueBadge";
 
 type Severity = "critical" | "moderate";
 
@@ -121,11 +122,7 @@ export default function ResultPage() {
                 {/* Top header */}
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Analysis</h1>
-                        <p className="mt-1 text-sm text-slate-600">
-                            Input language: <span className="font-medium">{report.inputLanguage}</span> ·
-                            Minimum Baseline: <span className="font-medium">{baselineLabel}</span>
-                        </p>
+                        <h1 className="text-3xl font-bold tracking-tight text-primary">Analysis</h1>
                     </div>
                     <button
                         onClick={() => navigate("/")}
@@ -136,26 +133,23 @@ export default function ResultPage() {
                 </div>
 
                 {/* Cards row */}
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Left card: message + counts + filter + copy */}
-                    <div className="md:col-span-2 rounded-2xl border border-card shadow-card bg-white  p-6">
+                    <div className="md:col-span-2 rounded-2xl border border-card shadow-card bg-white  py-8 px-10">
                         <div className="flex items-start justify-between gap-4">
-                            <div>
-                                <div className="text-lg font-semibold text-slate-800">
-                                    {counts.errors + counts.warnings === 0
-                                        ? "This code snippet already looks very solid!"
-                                        : "We found some opportunities to improve compatibility."}
+                            <div className="flex flex-col gap-2">
+                                <div className="text-2xl font-bold font-jakarta text-primary">
+                                    {counts.errors + counts.warnings === 0 ? (
+                                        <>
+                                            This code snippet already <br/> looks very solid!
+                                        </>
+                                    ) : (
+                                        "We found some opportunities to improve compatibility."
+                                    )}
                                 </div>
-                                <div className="mt-3 flex items-center gap-3 text-sm">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-red-100 text-red-700 px-3 py-1">
-                    <span className="h-2 w-2 rounded-full bg-red-500"></span>
-                      {counts.errors} Errors
-                  </span>
-                                    <span
-                                        className="inline-flex items-center gap-2 rounded-full bg-amber-100 text-amber-700 px-3 py-1">
-                    <span className="h-2 w-2 rounded-full bg-amber-500"></span>
-                                        {counts.warnings} Warnings
-                  </span>
+                                <div className="mt-4 flex items-center gap-5 text-sm">
+                                    <IssueBadge count={counts.errors} label="Errors" variant="error"/>
+                                    <IssueBadge count={counts.warnings} label="Warnings" variant="warning"/>
                                 </div>
                             </div>
 
@@ -183,12 +177,12 @@ export default function ResultPage() {
 
                     {/* Right card: score */}
                     <ScoreCard
-                            score={overallScore}
-                            segments={[
-                                {color: "#ff7072", value: counts.errors * 3},   // rot für Errors
-                                {color: "#ffdb70", value: counts.warnings * 2}, // orange für Warnings
-                                {color: "#5cbc4b", value: Math.max(0, 100 - (counts.errors * 3 + counts.warnings * 2))} // grün = Rest
-                            ]}
+                        score={overallScore}
+                        segments={[
+                            {color: "#ff7072", value: counts.errors * 3},   // rot für Errors
+                            {color: "#ffdb70", value: counts.warnings * 2}, // orange für Warnings
+                            {color: "#5cbc4b", value: Math.max(0, 100 - (counts.errors * 3 + counts.warnings * 2))} // grün = Rest
+                        ]}
                     />
                 </div>
 

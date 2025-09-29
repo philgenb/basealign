@@ -30,6 +30,14 @@ body,
   /* Shadows */
   --shadow-card: 0 0 15px 0 rgba(123, 150, 232, 0.12);
 
-  /* Border */
   --color-card: #E5E7EB;
+  --color-primary: #202122;
+
+  /* Error colors */
+  --color-error: #FF0004;
+  --color-error-bg: rgba(255, 78, 81, 0.21);
+
+  /* Warning colors */
+  --color-warning: #CB9F1A;
+  --color-warning-bg: #FFF6DA;
 }
