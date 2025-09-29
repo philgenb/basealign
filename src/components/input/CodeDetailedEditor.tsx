@@ -5,11 +5,14 @@ import {
     type MutableRefObject
 } from "react";
 import {motion} from "motion/react";
-import Editor, {OnMount} from "@monaco-editor/react";
+import Editor, {type OnMount} from "@monaco-editor/react";
 import {useIsMac} from "./CodeEditor";
 import {AnalyseIcon} from "../../assets/imageComponents/AnalyseIcon";
 import {detectMonacoLanguage} from "../../lib/codeDetect";
 import {LanguageIcon} from "../../assets/imageComponents/LanguageIcon";
+import {analyzeCssString} from "../../lib/analyseCSS";
+import {useNavigate} from "react-router-dom";
+import type {BaselineMinLevel} from "../../lib/BaseLineChecker";
 
 type Monaco = typeof import("monaco-editor");
 
@@ -23,7 +26,6 @@ export interface CodeEditorProps {
     heightExpandedVh?: number;
     editorApiRef?: MutableRefObject<{ focus: () => void } | null>;
     /** Optional: callback when user clicks the analyze button */
-    onAnalyze?: () => void;
 }
 
 /** Blur the Monaco editor by blurring its DOM node; move focus to container as a safe target. */
@@ -45,7 +47,6 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
                                                                 heightCollapsed = 256,
                                                                 heightExpandedVh = 70,
                                                                 editorApiRef,
-                                                                onAnalyze,
                                                             }) => {
     const isMac = useIsMac();
     const [focused, setFocused] = useState(false);
@@ -53,6 +54,9 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
     const containerRef = useRef<HTMLDivElement | null>(null);
     const editorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null);
     const monacoRef = useRef<Monaco | null>(null);
+    const [minLevel, setMinLevel] = useState<BaselineMinLevel>("high");
+
+    const navigate = useNavigate();
 
     // Expand on paste inside the container (works immediately after load).
     useEffect(() => {
@@ -86,6 +90,20 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
             monaco.editor.setModelLanguage(model, detectedLang);
         }
     }, [detectedLang]);
+
+    const onAnalyze = () => {
+        try {
+            const report = analyzeCssString(value, minLevel);
+            navigate("/results", {
+                state: {
+                    report,
+                    sourceSnippet: value,
+                },
+            });
+        } catch (e) {
+            console.error("[Baseline] navigation failed:", e);
+        }
+    };
 
     const handleMount: OnMount = (editor, monaco) => {
         editorRef.current = editor;
@@ -230,7 +248,7 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
                     {hasContent && (
                         <button
                             type="button"
-                            onClick={() => (onAnalyze ? onAnalyze() : console.log("Analyze clicked"))}
+                            onClick={onAnalyze}
                             className="ml-3 inline-flex gap-2 items-center rounded-md bg-[#7B96E8] px-5 py-2 text-sm font-bold text-white hover:bg-[#6887E5] active:scale-[0.99] transition"
                         >
                             <AnalyseIcon/>

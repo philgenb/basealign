@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prepare:web-features": "mkdir -p src/data && cp node_modules/web-features/data/features.json src/data/web-features.json",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
@@ -12,14 +13,19 @@
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/vite": "^4.1.13",
+    "compute-baseline": "^0.4.0",
+    "css-tree": "^3.1.0",
     "highlight.js": "^11.11.1",
     "monaco-editor": "^0.53.0",
     "motion": "^12.23.22",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.3",
+    "web-features": "^3.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@types/css-tree": "^2.3.10",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.3",
@@ -31,6 +37,7 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.13",
     "vite": "^7.1.7",
-    "vite-plugin-monaco-editor": "^1.1.0"
+    "vite-plugin-monaco-editor": "^1.1.0",
+    "vite-plugin-node-polyfills": "^0.24.0"
   }
 }
