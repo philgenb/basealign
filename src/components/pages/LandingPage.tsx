@@ -1,9 +1,8 @@
 // src/pages/LandingPage.tsx
 import React, { useEffect, useRef, useState } from "react";
-import { useIsMac } from "../input/CodeEditor"; // falls du den Hook dort exportierst
+import { useIsMac } from "../input/CodeEditor";
 import { BaseAlignIcon } from "../../assets/imageComponents/BaseAlignIcon";
-import { CodeEditorMonaco } from "../input/CodeDetailedEditor"; // dein Pfad
-// Optional: entferne autoResizeTextarea/SimpleEditor, werden hier nicht mehr gebraucht
+import { CodeEditorMonaco } from "../input/CodeDetailedEditor";
 
 const LandingPage: React.FC = () => {
   const [code, setCode] = useState<string>("");
