@@ -60,13 +60,13 @@ const LandingPage: React.FC = () => {
     return (
         <div
             className="min-h-screen w-full bg-[radial-gradient(80%_60%_at_50%_0%,#eef2ff_0%,#f8fafc_40%,#ffffff_100%)] bg-no-repeat bg-fixed">
-            <div className="px-4 sm:px-6 lg:px-8 py-16">
+            <div className="px-4 sm:px-6 lg:px-8 py-14">
                 <motion.div
                     layout
-                    className={`mx-auto max-w-3xl flex ${
+                    className={`max-w-3xl flex ${
                         expanded
-                            ? "flex-row items-center justify-start text-left"
-                            : "flex-col items-center text-center"
+                            ? "flex-row ml-10 items-center justify-start text-left"
+                            : "flex-col mx-auto items-center text-center"
                     }`}
                 >
                     <BaseAlignIcon/>
@@ -105,7 +105,11 @@ const LandingPage: React.FC = () => {
                 </motion.div>
 
 
-                <div className="w-full mt-10 relative flex justify-center">
+                <div
+                    className={`w-full relative flex justify-center ${
+                        expanded ? "mt-6" : "mt-10"
+                    }`}
+                >
                     <CodeEditorMonaco
                         value={code}
                         onChange={setCode}

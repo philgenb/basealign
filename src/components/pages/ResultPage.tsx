@@ -5,6 +5,8 @@ import {IssuesTable, type ScoredIssue} from "../results/IssuesTables";
 import {ScoreCard} from "../results/ScoreCard";
 import {BrowserBadge} from "../results/BrowserBadge";
 import {IssueBadge} from "../results/IssueBadge";
+import {analyzeAccessibility} from "../../lib/analyzeAccesibility";
+import {AccessibilityScore} from "../results/AccessibilityScore";
 
 type Severity = "critical" | "moderate";
 
@@ -40,6 +42,12 @@ export default function ResultPage() {
     }
 
     const {report, sourceSnippet = ""} = state;
+
+    const {issues: a11yIssues, score: a11yScore} = useMemo(
+        () => analyzeAccessibility(sourceSnippet),
+        [sourceSnippet]
+    );
+
 
     // Score issues and sort
     const scoredAll: ScoredIssue[] = useMemo(
@@ -197,16 +205,23 @@ export default function ResultPage() {
               </pre>
                         </div>
                         <div>
-                            <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-2">Recommendation</div>
-                            <pre
-                                className="text-xs leading-5 font-jetbrains text-[#707083] p-4 rounded-lg overflow-x-auto">
-                {/* For now, mirror. Hook in your fixer later */}
-                                {sourceSnippet || "/* Suggestions will appear here */"}
-              </pre>
+                            <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-3">Accessibility Score
+                            </div>
+                            <div>
+                                <AccessibilityScore score={a11yScore}/>
+                                <ul className="mt-5 list-disc pl-5 text-sm font-medium text-[#747D86] font-jakarta space-y-1">
+                                    {a11yIssues.length === 0 ? (
+                                        <li>No accessibility issues detected.</li>
+                                    ) : (
+                                        a11yIssues.map((iss, i) => <li key={i}>{iss.message}</li>)
+                                    )}
+                                </ul>
+                            </div>
+
                         </div>
                     </div>
 
-                    <div className="w-full h-[1.6px] bg-gray-50" />
+                    <div className="w-full h-[1.6px] bg-gray-50"/>
 
 
                     {/* Infringement + Problematic with */}
@@ -225,7 +240,7 @@ export default function ResultPage() {
                             <div className="text-sm font-bold font-jetbrains text-[#3B3535]">Problematic with</div>
                             <div className="mt-3.5 flex items-center gap-3">
                                 {problematic.length === 0 ? (
-                                    <span className="text-sm text-slate-600">No major browser risks.</span>
+                                    <span className="text-sm text-[#747D86]">No major browser risks.</span>
                                 ) : (
                                     problematic.map((b) => <BrowserBadge key={b} name={b}/>)
                                 )}

@@ -13,6 +13,7 @@
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/vite": "^4.1.13",
+    "axe-core": "^4.10.3",
     "compute-baseline": "^0.4.0",
     "css-tree": "^3.1.0",
     "highlight.js": "^11.11.1",
