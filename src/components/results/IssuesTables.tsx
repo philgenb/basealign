@@ -19,7 +19,7 @@ function SeverityBadge({ s }: { s: Severity }) {
 /** Table showing all scored issues. Pure presentational component. */
 export const IssuesTable: React.FC<{ issues: ScoredIssue[] }> = ({ issues }) => {
   return (
-    <div className="mt-8 overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm">
+    <div className="mt-8 overflow-hidden rounded-xl border border-card bg-white shadow-card">
       <table className="min-w-full text-left text-sm">
         <thead className="bg-slate-50/80">
           <tr className="text-slate-600">

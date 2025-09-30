@@ -1,78 +1,156 @@
-import React, { useEffect, useRef, useState } from "react";
-import { BaseAlignIcon } from "../../assets/imageComponents/BaseAlignIcon";
-import { CodeEditorMonaco } from "../input/CodeDetailedEditor";
+import React, {useEffect, useRef, useState} from "react";
+import {BaseAlignIcon} from "../../assets/imageComponents/BaseAlignIcon";
+import {CodeEditorMonaco} from "../input/CodeDetailedEditor";
 import {useIsMac} from "../../hooks/useIsMac";
+import {AppleKeyIcon} from "../../assets/imageComponents/AppleKeyIcon";
+import {VKeyIcon} from "../../assets/imageComponents/VKeyIcon";
+import {AnalyseIcon} from "../../assets/imageComponents/AnalyseIcon";
+import {analyzeCssString} from "../../lib/analyseCSS";
+import {useNavigate} from "react-router-dom";
+import type {BaselineMinLevel} from "../../lib/BaseLineChecker";
+import {motion} from "motion/react";
 
 const LandingPage: React.FC = () => {
-  const [code, setCode] = useState<string>("");
-  const [expanded, setExpanded] = useState<boolean>(false);
-  const isMac = useIsMac();
+    const [code, setCode] = useState<string>("");
+    const [expanded, setExpanded] = useState<boolean>(false);
+    const isMac = useIsMac();
+    const editorApiRef = useRef<{ focus: () => void } | null>(null);
+    const navigate = useNavigate();
+    const [minLevel] = useState<BaselineMinLevel>("high");
 
-  const editorApiRef = useRef<{ focus: () => void } | null>(null);
+    useEffect(() => {
+        const onGlobalPaste = (e: ClipboardEvent) => {
+            const tgt = e.target as HTMLElement | null;
+            const tag = (tgt?.tagName ?? "").toUpperCase();
+            const isEditable =
+                tag === "INPUT" || tag === "TEXTAREA" || Boolean(tgt?.isContentEditable);
+            if (isEditable) return;
 
-  useEffect(() => {
-    const onGlobalPaste = (e: ClipboardEvent) => {
-      const tgt = e.target as HTMLElement | null;
-      const tag = (tgt?.tagName ?? "").toUpperCase();
-      const isEditable =
-        tag === "INPUT" || tag === "TEXTAREA" || Boolean(tgt?.isContentEditable);
-      if (isEditable) return;
+            const text = e.clipboardData?.getData("text") ?? "";
+            if (!text.trim()) return;
 
-      const text = e.clipboardData?.getData("text") ?? "";
-      if (!text.trim()) return;
+            e.preventDefault();
+            setExpanded(true);
+            setCode((prev) => (prev ? `${prev}\n${text}` : text));
 
-      e.preventDefault();
-      setExpanded(true);
-      setCode((prev) => (prev ? `${prev}\n${text}` : text));
+            requestAnimationFrame(() => {
+                editorApiRef.current?.focus();
+                const el = document.querySelector<HTMLElement>(
+                    "[aria-label='Monaco code editor']"
+                );
+                el?.focus();
+            });
+        };
 
-      requestAnimationFrame(() => {
-        editorApiRef.current?.focus();
+        window.addEventListener("paste", onGlobalPaste);
+        return () => window.removeEventListener("paste", onGlobalPaste);
+    }, []);
 
-        const el = document.querySelector<HTMLElement>("[aria-label='Monaco code editor']");
-        el?.focus();
-      });
+    const onAnalyze = () => {
+        try {
+            const report = analyzeCssString(code, minLevel);
+            navigate("/results", {
+                state: {report, sourceSnippet: code},
+            });
+        } catch (e) {
+            console.error("[Baseline] navigation failed:", e);
+        }
     };
 
-    window.addEventListener("paste", onGlobalPaste);
-    return () => window.removeEventListener("paste", onGlobalPaste);
-  }, []);
+    return (
+        <div
+            className="min-h-screen w-full bg-[radial-gradient(80%_60%_at_50%_0%,#eef2ff_0%,#f8fafc_40%,#ffffff_100%)] bg-no-repeat bg-fixed">
+            <div className="px-4 sm:px-6 lg:px-8 py-16">
+                <div className="mx-auto max-w-3xl flex flex-col items-center text-center">
+                    <BaseAlignIcon className="mb-6 h-16 w-16"/>
+                    <motion.h1
+                        initial={{opacity: 0, y: 20, scale: 0.95}}
+                        animate={{opacity: 1, y: 0, scale: 1}}
+                        transition={{
+                            duration: 0.2,
+                            ease: [0.25, 0.8, 0.25, 1],
+                        }}
+                        className="mt-4 text-5xl font-jakarta font-bold tracking-tight text-primary"
+                    >
+                        Test your browser baseline
+                    </motion.h1>
 
-  return (
-    <div className="min-h-screen w-full bg-[radial-gradient(80%_60%_at_50%_0%,#eef2ff_0%,#f8fafc_40%,#ffffff_100%)] bg-no-repeat bg-fixed">
-      <div className="px-4 sm:px-6 lg:px-8 py-16">
-        <div className="mx-auto max-w-3xl flex flex-col items-center text-center">
-          <BaseAlignIcon className="mb-6 h-16 w-16" />
-          <h1 className="mt-4 text-5xl font-jarkata font-bold tracking-tight text-gray-900">
-            Test your browser baseline
-          </h1>
-          <p className="mt-6 text-base font-medium text-[#6A6F77] max-w-3xl">
-            Quickly check if your project runs on a shared baseline across different
-            browsers. Detect missing features, compare support, and ensure consistent
-            user experiences.
-          </p>
+                    <motion.p
+                        initial={{opacity: 0, y: 10}}
+                        animate={{opacity: 1, y: 0}}
+                        transition={{
+                            duration: 0.3,
+                            ease: "easeOut",
+                            delay: 0.1,
+                        }}
+                        className="mt-6 text-base tracking-tight font-medium text-[#6A6F77] max-w-3xl"
+                    >
+                        Quickly check if your project runs on a shared baseline across
+                        different browsers. Detect missing features, compare support, and
+                        ensure consistent user experiences.
+                    </motion.p>
+
+                </div>
+
+                <div className="w-fit mt-10 relative mx-auto">
+                    <CodeEditorMonaco
+                        value={code}
+                        onChange={setCode}
+                        expanded={expanded}
+                        setExpanded={setExpanded}
+                        editorApiRef={editorApiRef}
+                        language="javascript"
+                        heightCollapsed={256}
+                        heightExpandedVh={70}
+                    />
+
+                    {/* Shortcuts hint */}
+                    {!expanded && (
+                        <motion.div
+                            initial={{opacity: 0, scale: 0.8, rotate: -5}}
+                            animate={{opacity: 1, scale: 1, rotate: 0}}
+                            exit={{opacity: 0, scale: 0.8, rotate: 5}}
+                            transition={{
+                                duration: 0.4,
+                                ease: [0.25, 0.8, 0.25, 1], // etwas bounciger
+                            }}
+                            className="absolute flex justify-end items-center gap-1 right-20 bottom-8"
+                        >
+                            <AppleKeyIcon className="h-10"/>
+                            <p className="font-jetbrains font-medium text-lg text-[#CED4E5]">+</p>
+                            <VKeyIcon className="h-10"/>
+                        </motion.div>
+                    )}
+
+                    {/* Analyze Button only when expanded */}
+                    {expanded && code.trim().length > 0 && (
+                        <motion.div
+                            initial={{opacity: 0, scale: 0.7, y: 10}}
+                            animate={{opacity: 1, scale: 1, y: 0}}
+                            exit={{opacity: 0, scale: 0.6, y: 10}}
+                            transition={{
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 25,
+                            }}
+                            className="absolute right-20 bottom-8"
+                        >
+                            <button
+                                type="button"
+                                onClick={onAnalyze}
+                                className="inline-flex gap-2 items-center rounded-md bg-[#7B96E8] px-6 py-2 text-base font-bold text-white hover:bg-[#6887E5] active:scale-[0.97] transition"
+                            >
+                                <AnalyseIcon/>
+                                Analyze
+                            </button>
+                        </motion.div>
+                    )}
+                </div>
+
+
+            </div>
         </div>
-
-        <div className="mt-10 justify-center">
-          <CodeEditorMonaco
-            value={code}
-            onChange={setCode}
-            expanded={expanded}
-            setExpanded={setExpanded}
-            editorApiRef={editorApiRef}
-            language="javascript"
-            heightCollapsed={256}
-            heightExpandedVh={70}
-          />
-        </div>
-
-        {!expanded && (
-          <div className="mt-4 text-center text-sm text-black/50">
-            Press {isMac ? "⌘" : "Ctrl"}+V to paste your code and expand the editor
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    );
 };
 
 export default LandingPage;
