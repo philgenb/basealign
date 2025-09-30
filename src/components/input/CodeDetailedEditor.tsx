@@ -16,7 +16,7 @@ export interface CodeEditorProps {
     language?: string;
     heightCollapsed?: number;
     heightExpandedVh?: number;
-    editorApiRef?: MutableRefObject<{ focus: () => void } | null>;
+    editorApiRef: MutableRefObject<{ focus: () => void } | null>;
     children?: React.ReactNode;
 }
 
@@ -30,14 +30,6 @@ function blurEditorDom(
     containerEl?.focus?.();
 }
 
-/** Small keycap */
-const Keycap: React.FC<React.PropsWithChildren> = ({children}) => (
-    <span
-        className="inline-flex items-center justify-center rounded-md border px-2 py-1 text-xs font-medium shadow-sm bg-white/80 border-black/10">
-    {children}
-  </span>
-);
-
 export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
                                                                 value,
                                                                 onChange,
@@ -47,14 +39,20 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
                                                                 heightCollapsed = 256,
                                                                 heightExpandedVh = 70,
                                                                 editorApiRef,
-                                                                children
+                                                                children,
                                                             }) => {
     const isMac = useIsMac();
     const [focused, setFocused] = useState(false);
-    const [detectedLang, setDetectedLang] = useState<string>(language || "plaintext");
+    const [detectedLang, setDetectedLang] = useState<string>(
+        language || "plaintext"
+    );
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const editorRef = useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null);
+    const editorRef =
+        useRef<import("monaco-editor").editor.IStandaloneCodeEditor | null>(null);
     const monacoRef = useRef<Monaco | null>(null);
+
+    // flag: expand triggered by typing
+    const focusOnMountRef = useRef(false);
 
     // Expand on paste inside the container
     useEffect(() => {
@@ -69,16 +67,45 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
+
         const handleKeyDown = (e: KeyboardEvent) => {
             if (expanded) return;
-            // ignore pure modifier keys
-            if (e.key.length === 1 || e.key === "Enter" || e.key === "Backspace" || e.key === "Tab") {
+
+            const isMetaOrCtrl = e.metaKey || e.ctrlKey;
+
+            // Handle paste: don't inject "v" if it's Ctrl+V / ⌘V
+            if (isMetaOrCtrl && e.key.toLowerCase() === "v") {
                 setExpanded(true);
+                focusOnMountRef.current = true;
+                return; // let paste event do the insertion
+            }
+
+            if (e.key.length === 1) {
+                setExpanded(true);
+                onChange(value + e.key);
+                focusOnMountRef.current = true;
+                e.preventDefault();
+            } else if (e.key === "Enter") {
+                setExpanded(true);
+                onChange(value + "\n");
+                focusOnMountRef.current = true;
+                e.preventDefault();
+            } else if (e.key === "Backspace") {
+                setExpanded(true);
+                onChange(value.slice(0, -1));
+                focusOnMountRef.current = true;
+                e.preventDefault();
+            } else if (e.key === "Tab") {
+                setExpanded(true);
+                onChange(value + "  ");
+                focusOnMountRef.current = true;
+                e.preventDefault();
             }
         };
+
         el.addEventListener("keydown", handleKeyDown);
         return () => el.removeEventListener("keydown", handleKeyDown);
-    }, [expanded, setExpanded]);
+    }, [expanded, value, onChange, setExpanded]);
 
     // Auto-collapse when value becomes empty
     useEffect(() => {
@@ -106,7 +133,7 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
         monacoRef.current = monaco;
         editor.updateOptions({automaticLayout: true});
 
-        if (editorApiRef) editorApiRef.current = {focus: () => editor.focus()};
+        editorApiRef.current = {focus: () => editor.focus()};
 
         editor.onDidFocusEditorText(() => setFocused(true));
         editor.onDidBlurEditorText(() => setFocused(false));
@@ -120,7 +147,7 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
             }
         });
 
-        // Theme (optional: keep yours)
+        // Apply theme
         monaco.editor.defineTheme("ba-light", {
             base: "vs",
             inherit: true,
@@ -141,10 +168,21 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
                 "editorIndentGuide.activeBackground": "#D1D5DB",
                 "scrollbarSlider.background": "#E5E7EB",
                 "scrollbarSlider.hoverBackground": "#D1D5DB",
-                "scrollbarSlider.activeBackground": "#9CA3AF"
-            }
+                "scrollbarSlider.activeBackground": "#9CA3AF",
+            },
         });
         monaco.editor.setTheme("ba-light");
+
+        if (focusOnMountRef.current) {
+            editor.focus();
+            const model = editor.getModel();
+            if (model) {
+                const lineCount = model.getLineCount();
+                const lastLineLength = model.getLineContent(lineCount).length;
+                editor.setPosition({lineNumber: lineCount, column: lastLineLength + 1});
+            }
+            focusOnMountRef.current = false;
+        }
     };
 
     const handleChange = (v?: string) => {
@@ -165,11 +203,8 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
   w-full ${expanded ? "max-w-5xl min-h-[500px]" : "max-w-2xl min-h-[220px]"}`}
             transition={{duration: 0.4, ease: [0.25, 0.8, 0.25, 1]}}
         >
-
-            {/* COLLAPSED PLACEHOLDER WITH BLINKING CURSOR */}
-            {isEmptyCollapsed && (
-                <PlaceholderEditor/>
-            )}
+            {/* COLLAPSED PLACEHOLDER */}
+            {isEmptyCollapsed && <PlaceholderEditor/>}
 
             {/* EXPANDED: REAL MONACO */}
             {expanded && (
@@ -195,7 +230,10 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
                                     padding: {top: 10, bottom: 10},
                                     renderLineHighlight: "line",
                                     smoothScrolling: true,
-                                    scrollbar: {verticalScrollbarSize: 8, horizontalScrollbarSize: 8},
+                                    scrollbar: {
+                                        verticalScrollbarSize: 8,
+                                        horizontalScrollbarSize: 8,
+                                    },
                                 }}
                                 onMount={handleMount}
                             />
