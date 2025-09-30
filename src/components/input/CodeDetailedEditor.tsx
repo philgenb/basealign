@@ -135,6 +135,14 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
 
         editorApiRef.current = {focus: () => editor.focus()};
 
+        // Always detect language on mount (important for paste-before-mount)
+        const initialText = editor.getValue() ?? "";
+        const guessed = detectMonacoLanguage(initialText);
+        if (guessed && guessed !== detectedLang) {
+            setDetectedLang(guessed);
+            monaco.editor.setModelLanguage(editor.getModel()!, guessed);
+        }
+
         editor.onDidFocusEditorText(() => setFocused(true));
         editor.onDidBlurEditorText(() => setFocused(false));
 
@@ -188,9 +196,23 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
     const handleChange = (v?: string) => {
         const text = v ?? "";
         onChange(text);
+
         const guessed = detectMonacoLanguage(text);
-        if (guessed && guessed !== detectedLang) setDetectedLang(guessed);
+        if (guessed && guessed !== detectedLang) {
+            setDetectedLang(guessed);
+
+            // update Monaco model right away
+            const editor = editorRef.current;
+            const monaco = monacoRef.current;
+            if (editor && monaco) {
+                const model = editor.getModel?.();
+                if (model) {
+                    monaco.editor.setModelLanguage(model, guessed);
+                }
+            }
+        }
     };
+
 
     const isEmptyCollapsed = !expanded && value.trim() === "";
 
