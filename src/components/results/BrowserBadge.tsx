@@ -1,21 +1,27 @@
 import React from "react";
+import {ChromeIcon} from "../../assets/imageComponents/ChromeIcon";
+import {FirefoxIcon} from "../../assets/imageComponents/FirefoxIcon";
+import {SafariIcon} from "../../assets/imageComponents/SafariIcon";
 
 type BrowserName = "chrome" | "firefox" | "safari";
 
-export const BrowserBadge: React.FC<{ name: BrowserName }> = ({ name }) => {
-  const map = {
-    chrome: { label: "Chrome", bg: "bg-emerald-50", text: "text-emerald-700" },
-    firefox: { label: "Firefox", bg: "bg-orange-50", text: "text-orange-700" },
-    safari: { label: "Safari", bg: "bg-sky-50", text: "text-sky-700" },
-  } as const;
+export const BrowserBadge: React.FC<{ name: BrowserName }> = ({name}) => {
+    const icons: Record<BrowserName, React.ReactNode> = {
+        chrome: <ChromeIcon className="h-8 w-8"/>,
+        firefox: <FirefoxIcon className="h-8 w-8"/>,
+        safari: <SafariIcon className="h-8 w-8"/>,
+    };
 
-  const { label, bg, text } = map[name];
-
-  return (
-    <span
-      className={`inline-flex items-center rounded-lg border border-black/10 px-3 py-1 text-xs font-semibold ${bg} ${text}`}
-    >
-      {label}
-    </span>
-  );
+    return (
+        <div
+            className="
+        flex items-center justify-center rounded-2xl p-2
+        bg-white
+        shadow-card
+        border border-card
+      "
+        >
+            {icons[name]}
+        </div>
+    );
 };

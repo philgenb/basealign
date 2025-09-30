@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -26,6 +26,7 @@ body,
   --font-jakarta: "Plus Jakarta Sans", sans-serif;
   --font-montserrat: "Montserrat", sans-serif;
   --font-outfit: "Outfit", sans-serif;
+  --font-jetbrains: "JetBrains Mono", monospace;
 
   /* Shadows */
   --shadow-card: 0 0 15px 0 rgba(123, 150, 232, 0.12);
@@ -40,4 +41,7 @@ body,
   /* Warning colors */
   --color-warning: #CB9F1A;
   --color-warning-bg: #FFF6DA;
+
+  --gradient-divider: linear-gradient(to right, transparent 0%, #E5E7EB 47%, transparent 98%);
+
 }

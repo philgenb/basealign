@@ -118,11 +118,11 @@ export default function ResultPage() {
 
     return (
         <div className="min-h-screen w-full bg-gradient-to-b from-white to-slate-50">
-            <div className="max-w-6xl mx-auto px-6 py-10">
+            <div className="max-w-6xl mx-auto px-6 py-16">
                 {/* Top header */}
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-primary">Analysis</h1>
+                        <h1 className="text-3xl font-bold tracking-tight font-jakarta text-primary">Analysis</h1>
                     </div>
                     <button
                         onClick={() => navigate("/")}
@@ -190,27 +190,30 @@ export default function ResultPage() {
                 <div className="mt-6 rounded-2xl border border-card shadow-card bg-white p-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
-                            <div className="text-sm font-semibold text-slate-600 mb-2">Current</div>
+                            <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-2">Current</div>
                             <pre
-                                className="text-xs leading-5 bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto">
+                                className="text-xs leading-5 font-jetbrains text-[#707083] p-4 rounded-lg overflow-x-auto">
                 {sourceSnippet || "/* No source code provided */"}
               </pre>
                         </div>
                         <div>
-                            <div className="text-sm font-semibold text-slate-600 mb-2">Recommendation</div>
+                            <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-2">Recommendation</div>
                             <pre
-                                className="text-xs leading-5 bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto">
+                                className="text-xs leading-5 font-jetbrains text-[#707083] p-4 rounded-lg overflow-x-auto">
                 {/* For now, mirror. Hook in your fixer later */}
                                 {sourceSnippet || "/* Suggestions will appear here */"}
               </pre>
                         </div>
                     </div>
 
+                    <div className="w-full h-[1.6px] bg-gray-50" />
+
+
                     {/* Infringement + Problematic with */}
                     <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
-                            <div className="text-sm font-semibold text-slate-700">Infringement</div>
-                            <ul className="mt-2 list-disc pl-5 text-sm text-slate-700">
+                            <div className="text-sm font-bold font-jetbrains text-[#3B3535]">Infringement</div>
+                            <ul className="mt-2 list-disc font-medium  font-jakarta pl-5 text-sm text-[#747D86]">
                                 {infringementBullets.length === 0 ? (
                                     <li>No notable incompatibilities detected.</li>
                                 ) : (
@@ -219,8 +222,8 @@ export default function ResultPage() {
                             </ul>
                         </div>
                         <div>
-                            <div className="text-sm font-semibold text-slate-700">Problematic with</div>
-                            <div className="mt-2 flex items-center gap-2">
+                            <div className="text-sm font-bold font-jetbrains text-[#3B3535]">Problematic with</div>
+                            <div className="mt-3.5 flex items-center gap-3">
                                 {problematic.length === 0 ? (
                                     <span className="text-sm text-slate-600">No major browser risks.</span>
                                 ) : (
