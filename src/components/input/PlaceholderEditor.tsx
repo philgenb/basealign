@@ -1,9 +1,9 @@
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { useIsMac } from "../../hooks/useIsMac";
-import {EditorLine2} from "../../assets/imageComponents/EditorLine2";
-import {EditorLine1} from "../../assets/imageComponents/EditorLine1";
-import {EditorLine3} from "../../assets/imageComponents/EditorLine3";
-import {EditorLine4} from "../../assets/imageComponents/EditorLine4";
+import { EditorLine2 } from "../../assets/imageComponents/EditorLine2";
+import { EditorLine1 } from "../../assets/imageComponents/EditorLine1";
+import { EditorLine3 } from "../../assets/imageComponents/EditorLine3";
+import { EditorLine4 } from "../../assets/imageComponents/EditorLine4";
 
 /** Small keycap visual */
 const Keycap: React.FC<React.PropsWithChildren> = ({ children }) => (
@@ -13,7 +13,50 @@ const Keycap: React.FC<React.PropsWithChildren> = ({ children }) => (
 );
 
 export const PlaceholderEditor: React.FC = () => {
-  const isMac = useIsMac();
+  const fullText = "Paste your code here";
+  const [displayed, setDisplayed] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [loop, setLoop] = useState(0);
+
+  useEffect(() => {
+    const speed = isDeleting ? 70 : 120; // typing vs deleting speed
+    let delay = speed;
+
+    if (!isDeleting && displayed === fullText) {
+      // finished typing → wait 5 seconds before deleting
+      delay = 5000;
+    }
+
+    const timeout = setTimeout(() => {
+      setDisplayed((prev) => {
+        if (!isDeleting) {
+          // typing
+          const next = fullText.slice(0, prev.length + 1);
+          if (next === fullText) {
+            // don't immediately set deleting here,
+            // the 5s delay will kick in before deletion starts
+            return next;
+          }
+          return next;
+        } else {
+          // deleting
+          const next = prev.slice(0, -1);
+          if (next === "") {
+            setIsDeleting(false);
+            setLoop(loop + 1);
+          }
+          return next;
+        }
+      });
+
+      // trigger deleting after the pause
+      if (!isDeleting && displayed === fullText) {
+        setIsDeleting(true);
+      }
+    }, delay);
+
+    return () => clearTimeout(timeout);
+  }, [displayed, isDeleting, loop]);
 
   return (
     <div className="px-7 pb-6">
@@ -24,8 +67,9 @@ export const PlaceholderEditor: React.FC = () => {
             <div className="w-6 text-right font-mono text-base text-[#E8EBF3] select-none">
               1.
             </div>
-            <div className="text-sm font-jetbrains text-[#707083]">
-              <span>Paste your code here</span>
+            <div className="text-sm font-bold font-jetbrains text-[#707083]">
+              <span>{displayed}</span>
+              {/* blinking cursor */}
               <motion.span
                 aria-hidden
                 initial={{ opacity: 1 }}

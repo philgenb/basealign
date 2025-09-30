@@ -123,7 +123,7 @@ const LandingPage: React.FC = () => {
                                 animate={{opacity: 1, scale: 1, rotate: 0}}
                                 exit={{opacity: 0, scale: 0.8, rotate: 5}}
                                 transition={{duration: 0.4, ease: [0.25, 0.8, 0.25, 1]}}
-                                className="absolute flex justify-end items-center gap-1 right-6 bottom-6"
+                                className="absolute flex justify-end items-center gap-1 right-8 bottom-7"
                             >
                                 <AppleKeyIcon className="h-10"/>
                                 <p className="font-jetbrains font-medium text-lg text-[#CED4E5]">+</p>
