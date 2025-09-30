@@ -61,38 +61,51 @@ const LandingPage: React.FC = () => {
         <div
             className="min-h-screen w-full bg-[radial-gradient(80%_60%_at_50%_0%,#eef2ff_0%,#f8fafc_40%,#ffffff_100%)] bg-no-repeat bg-fixed">
             <div className="px-4 sm:px-6 lg:px-8 py-16">
-                <div className="mx-auto max-w-3xl flex flex-col items-center text-center">
-                    <BaseAlignIcon className="mb-6 h-16 w-16"/>
-                    <motion.h1
-                        initial={{opacity: 0, y: 20, scale: 0.95}}
-                        animate={{opacity: 1, y: 0, scale: 1}}
-                        transition={{
-                            duration: 0.2,
-                            ease: [0.25, 0.8, 0.25, 1],
-                        }}
-                        className="mt-4 text-5xl font-jakarta font-bold tracking-tight text-primary"
-                    >
-                        Test your browser baseline
-                    </motion.h1>
+                <motion.div
+                    layout
+                    className={`mx-auto max-w-3xl flex ${
+                        expanded
+                            ? "flex-row items-center justify-start text-left"
+                            : "flex-col items-center text-center"
+                    }`}
+                >
+                    <BaseAlignIcon/>
 
-                    <motion.p
-                        initial={{opacity: 0, y: 10}}
-                        animate={{opacity: 1, y: 0}}
-                        transition={{
-                            duration: 0.3,
-                            ease: "easeOut",
-                            delay: 0.1,
-                        }}
-                        className="mt-6 text-base tracking-tight font-medium text-[#6A6F77] max-w-3xl"
-                    >
-                        Quickly check if your project runs on a shared baseline across
-                        different browsers. Detect missing features, compare support, and
-                        ensure consistent user experiences.
-                    </motion.p>
+                    <div className={expanded ? "flex flex-col items-start" : ""}>
+                        <motion.h1
+                            layout
+                            variants={{
+                                collapsed: {scale: 1, fontSize: "56px"},
+                                expanded: {scale: 0.9, fontSize: "36px"},
+                            }}
+                            initial="collapsed"
+                            animate={expanded ? "expanded" : "collapsed"}
+                            transition={{duration: 0.4, ease: [0.25, 0.8, 0.25, 1]}}
+                            className="font-jakarta font-bold tracking-tight text-primary"
+                        >
+                            Test your browser baseline
+                        </motion.h1>
 
-                </div>
+                        {/* Subheadline nur im collapsed-State */}
+                        {!expanded && (
+                            <motion.p
+                                layout
+                                initial={{opacity: 0}}
+                                animate={{opacity: 1}}
+                                exit={{opacity: 0}}
+                                transition={{duration: 0.3}}
+                                className="mt-6 text-base tracking-tight font-medium text-[#6A6F77] max-w-3xl"
+                            >
+                                Quickly check if your project runs on a shared baseline across different
+                                browsers. Detect missing features, compare support, and ensure consistent
+                                user experiences.
+                            </motion.p>
+                        )}
+                    </div>
+                </motion.div>
 
-                <div className="w-fit mt-10 relative mx-auto">
+
+                <div className="w-full mt-10 relative flex justify-center">
                     <CodeEditorMonaco
                         value={code}
                         onChange={setCode}
@@ -102,49 +115,42 @@ const LandingPage: React.FC = () => {
                         language="javascript"
                         heightCollapsed={256}
                         heightExpandedVh={70}
-                    />
-
-                    {/* Shortcuts hint */}
-                    {!expanded && (
-                        <motion.div
-                            initial={{opacity: 0, scale: 0.8, rotate: -5}}
-                            animate={{opacity: 1, scale: 1, rotate: 0}}
-                            exit={{opacity: 0, scale: 0.8, rotate: 5}}
-                            transition={{
-                                duration: 0.4,
-                                ease: [0.25, 0.8, 0.25, 1], // etwas bounciger
-                            }}
-                            className="absolute flex justify-end items-center gap-1 right-20 bottom-8"
-                        >
-                            <AppleKeyIcon className="h-10"/>
-                            <p className="font-jetbrains font-medium text-lg text-[#CED4E5]">+</p>
-                            <VKeyIcon className="h-10"/>
-                        </motion.div>
-                    )}
-
-                    {/* Analyze Button only when expanded */}
-                    {expanded && code.trim().length > 0 && (
-                        <motion.div
-                            initial={{opacity: 0, scale: 0.7, y: 10}}
-                            animate={{opacity: 1, scale: 1, y: 0}}
-                            exit={{opacity: 0, scale: 0.6, y: 10}}
-                            transition={{
-                                type: "spring",
-                                stiffness: 300,
-                                damping: 25,
-                            }}
-                            className="absolute right-20 bottom-8"
-                        >
-                            <button
-                                type="button"
-                                onClick={onAnalyze}
-                                className="inline-flex gap-2 items-center rounded-md bg-[#7B96E8] px-6 py-2 text-base font-bold text-white hover:bg-[#6887E5] active:scale-[0.97] transition"
+                    >
+                        {/* Shortcuts hint */}
+                        {!expanded && (
+                            <motion.div
+                                initial={{opacity: 0, scale: 0.8, rotate: -5}}
+                                animate={{opacity: 1, scale: 1, rotate: 0}}
+                                exit={{opacity: 0, scale: 0.8, rotate: 5}}
+                                transition={{duration: 0.4, ease: [0.25, 0.8, 0.25, 1]}}
+                                className="absolute flex justify-end items-center gap-1 right-6 bottom-6"
                             >
-                                <AnalyseIcon/>
-                                Analyze
-                            </button>
-                        </motion.div>
-                    )}
+                                <AppleKeyIcon className="h-10"/>
+                                <p className="font-jetbrains font-medium text-lg text-[#CED4E5]">+</p>
+                                <VKeyIcon className="h-10"/>
+                            </motion.div>
+                        )}
+
+                        {/* Analyze Button only when expanded */}
+                        {expanded && code.trim().length > 0 && (
+                            <motion.div
+                                initial={{opacity: 0, scale: 0.7, y: 10}}
+                                animate={{opacity: 1, scale: 1, y: 0}}
+                                exit={{opacity: 0, scale: 0.6, y: 10}}
+                                transition={{type: "spring", stiffness: 300, damping: 25}}
+                                className="absolute right-6 bottom-6"
+                            >
+                                <button
+                                    type="button"
+                                    onClick={onAnalyze}
+                                    className="inline-flex gap-2 items-center rounded-md bg-[#7B96E8] px-6 py-2 text-base font-bold text-white hover:bg-[#6887E5] active:scale-[0.97] transition"
+                                >
+                                    <AnalyseIcon/>
+                                    Analyze
+                                </button>
+                            </motion.div>
+                        )}
+                    </CodeEditorMonaco>
                 </div>
 
 
