@@ -7,6 +7,7 @@ import {BrowserBadge} from "../results/BrowserBadge";
 import {IssueBadge} from "../results/IssueBadge";
 import {analyzeAccessibility} from "../../lib/analyzeAccesibility";
 import {AccessibilityScore} from "../results/AccessibilityScore";
+import {CodeViewer} from "../display/CodeViewer";
 
 type Severity = "critical" | "moderate";
 
@@ -47,7 +48,6 @@ export default function ResultPage() {
         () => analyzeAccessibility(sourceSnippet),
         [sourceSnippet]
     );
-
 
     // Score issues and sort
     const scoredAll: ScoredIssue[] = useMemo(
@@ -187,22 +187,19 @@ export default function ResultPage() {
                     <ScoreCard
                         score={overallScore}
                         segments={[
-                            {color: "#ff7072", value: counts.errors * 3},   // rot für Errors
-                            {color: "#ffdb70", value: counts.warnings * 2}, // orange für Warnings
-                            {color: "#5cbc4b", value: Math.max(0, 100 - (counts.errors * 3 + counts.warnings * 2))} // grün = Rest
+                            {color: "#ff7072", value: counts.errors * 3},   // red for errors
+                            {color: "#ffdb70", value: counts.warnings * 2}, // orange for Warnings
+                            {color: "#5cbc4b", value: Math.max(0, 100 - (counts.errors * 3 + counts.warnings * 2))} // green = rest
                         ]}
                     />
                 </div>
 
                 {/* Diff-ish card */}
                 <div className="mt-6 rounded-2xl border border-card shadow-card bg-white p-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6">
                         <div>
                             <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-2">Current</div>
-                            <pre
-                                className="text-xs leading-5 font-jetbrains text-[#707083] p-4 rounded-lg overflow-x-auto">
-                {sourceSnippet || "/* No source code provided */"}
-              </pre>
+                            <CodeViewer code={sourceSnippet} />
                         </div>
                         <div>
                             <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-3">Accessibility Score
