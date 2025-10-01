@@ -42,6 +42,23 @@ export default function ResultPage() {
         );
     }
 
+    function getErrorLines(code: string, issues: { loc?: { line?: number } }[]) {
+        const allLines = code.split("\n");
+        const errorLineNumbers = new Set(
+            issues.map((iss) => iss.loc?.line).filter((l): l is number => l !== undefined)
+        );
+
+        return allLines
+            .map((line, idx) => ({
+                number: idx + 1,
+                content: line,
+                isError: errorLineNumbers.has(idx + 1),
+            }))
+            .filter((l) => l.isError); // nur Fehlerzeilen behalten
+    }
+
+
+
     const {report, sourceSnippet = ""} = state;
 
     const {issues: a11yIssues, score: a11yScore} = useMemo(
@@ -124,6 +141,11 @@ export default function ResultPage() {
         }
     };
 
+    const errorLines = useMemo(
+        () => getErrorLines(sourceSnippet, scoredAll),
+        [sourceSnippet, scoredAll]
+    );
+
     return (
         <div className="min-h-screen w-full bg-gradient-to-b from-white to-slate-50">
             <div className="max-w-6xl mx-auto px-6 py-16">
@@ -202,7 +224,8 @@ export default function ResultPage() {
                             <CodeViewer code={sourceSnippet} />
                         </div>
                         <div>
-                            <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-3">Accessibility Score
+                            <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-3">Accessibility
+                                Score
                             </div>
                             <div>
                                 <AccessibilityScore score={a11yScore}/>
