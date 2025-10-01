@@ -1,6 +1,6 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "Basealign",
+  "short_name": "Basealign",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

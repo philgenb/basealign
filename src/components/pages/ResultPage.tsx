@@ -58,7 +58,6 @@ export default function ResultPage() {
     }
 
 
-
     const {report, sourceSnippet = ""} = state;
 
     const {issues: a11yIssues, score: a11yScore} = useMemo(
@@ -80,6 +79,16 @@ export default function ResultPage() {
                 }),
         [report.issues]
     );
+
+    const errorLineNumbers = useMemo(() => {
+        return Array.from(
+            new Set(
+                scoredAll
+                    .map(i => i.loc?.line)
+                    .filter((n): n is number => typeof n === "number" && n > 0)
+            )
+        ).sort((a, b) => a - b);
+    }, [scoredAll]);
 
     const counts = useMemo(() => {
         let errors = 0, warnings = 0;
@@ -221,7 +230,7 @@ export default function ResultPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6">
                         <div>
                             <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-2">Current</div>
-                            <CodeViewer code={sourceSnippet} lines={[1, 2, 6]} />
+                            <CodeViewer code={sourceSnippet} lines={errorLineNumbers} />
                         </div>
                         <div>
                             <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-3">Accessibility
