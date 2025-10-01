@@ -9,6 +9,10 @@ import {analyzeCssString} from "../../lib/analyseCSS";
 import {useNavigate} from "react-router-dom";
 import type {BaselineMinLevel} from "../../lib/BaseLineChecker";
 import {motion} from "motion/react";
+import {analyzeHtmlString} from "../../lib/analyseHTML";
+import {analyzeJsString} from "../../lib/analyseJavaScript";
+import {analyzeMixedString} from "../../lib/analyseMixed";
+import {analyzeJsxString} from "../../lib/analyseJSX";
 
 const LandingPage: React.FC = () => {
     const [code, setCode] = useState<string>("");
@@ -51,12 +55,28 @@ const LandingPage: React.FC = () => {
         try {
             let report;
 
-            console.log(detectedLang);
+            console.log("[Baseline] detected language:", detectedLang);
+
             if (detectedLang === "css") {
                 report = analyzeCssString(code, minLevel);
+
+            } else if (detectedLang === "html") {
+                if (code.includes("<style") || code.includes("<script")) {
+                    report = analyzeMixedString(code, minLevel);
+                } else {
+                    report = analyzeHtmlString(code, minLevel);
+                }
+
+            } else if (detectedLang === "javascript") {
+                if (code.includes("<") && code.includes("/>")) {
+                    report = analyzeJsxString(code, minLevel);
+                } else {
+                    report = analyzeJsString(code, minLevel);
+                }
+
             } else {
                 report = {
-                    inputLanguage: detectedLang as "css" | "javascript" | "plaintext",
+                    inputLanguage: detectedLang as "css" | "html" | "javascript" | "jsx" | "plaintext" | "mixed",
                     minLevel,
                     issues: [],
                     summary: {totalChecked: 0, belowMinLevel: 0},

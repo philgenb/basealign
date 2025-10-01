@@ -11,8 +11,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@babel/parser": "^7.28.4",
+    "@babel/traverse": "^7.28.4",
     "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/vite": "^4.1.13",
+    "acorn-walk": "^8.3.4",
     "axe-core": "^4.10.3",
     "compute-baseline": "^0.4.0",
     "css-tree": "^3.1.0",
