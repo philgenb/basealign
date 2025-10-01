@@ -17,6 +17,7 @@ const LandingPage: React.FC = () => {
     const editorApiRef = useRef<{ focus: () => void } | null>(null);
     const navigate = useNavigate();
     const [minLevel] = useState<BaselineMinLevel>("high");
+    const [detectedLang, setDetectedLang] = useState<string>("plaintext");
 
     useEffect(() => {
         const onGlobalPaste = (e: ClipboardEvent) => {
@@ -48,7 +49,20 @@ const LandingPage: React.FC = () => {
 
     const onAnalyze = () => {
         try {
-            const report = analyzeCssString(code, minLevel);
+            let report;
+
+            console.log(detectedLang);
+            if (detectedLang === "css") {
+                report = analyzeCssString(code, minLevel);
+            } else {
+                report = {
+                    inputLanguage: detectedLang as "css" | "javascript" | "plaintext",
+                    minLevel,
+                    issues: [],
+                    summary: {totalChecked: 0, belowMinLevel: 0},
+                };
+            }
+
             navigate("/results", {
                 state: {report, sourceSnippet: code},
             });
@@ -56,6 +70,7 @@ const LandingPage: React.FC = () => {
             console.error("[Baseline] navigation failed:", e);
         }
     };
+
 
     return (
         <div
@@ -119,6 +134,7 @@ const LandingPage: React.FC = () => {
                         language="javascript"
                         heightCollapsed={256}
                         heightExpandedVh={70}
+                        onLanguageChange={setDetectedLang}
                     >
                         {/* Shortcuts hint */}
                         {!expanded && (

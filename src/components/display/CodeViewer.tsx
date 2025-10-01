@@ -13,7 +13,7 @@ interface CodeViewerProps {
 export const CodeViewer: React.FC<CodeViewerProps> = ({
   code,
   language = "javascript",
-  minLines = 10,
+  minLines = 2,
   lines,
   highlightColor = "#FFD775",
 }) => {

@@ -18,6 +18,7 @@ export interface CodeEditorProps {
     heightExpandedVh?: number;
     editorApiRef: MutableRefObject<{ focus: () => void } | null>;
     children?: React.ReactNode;
+    onLanguageChange?: (lang: string) => void;
 }
 
 /** Blur the Monaco editor by blurring its DOM node; move focus to container as a safe target. */
@@ -40,6 +41,7 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
                                                                 heightExpandedVh = 70,
                                                                 editorApiRef,
                                                                 children,
+                                                                onLanguageChange,
                                                             }) => {
     const isMac = useIsMac();
     const [focused, setFocused] = useState(false);
@@ -142,6 +144,7 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
             setDetectedLang(guessed);
             monaco.editor.setModelLanguage(editor.getModel()!, guessed);
         }
+        onLanguageChange?.(guessed);
 
         editor.onDidFocusEditorText(() => setFocused(true));
         editor.onDidBlurEditorText(() => setFocused(false));
@@ -200,6 +203,7 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
         const guessed = detectMonacoLanguage(text);
         if (guessed && guessed !== detectedLang) {
             setDetectedLang(guessed);
+            onLanguageChange?.(guessed);
 
             // update Monaco model right away
             const editor = editorRef.current;

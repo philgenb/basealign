@@ -54,7 +54,7 @@ export default function ResultPage() {
                 content: line,
                 isError: errorLineNumbers.has(idx + 1),
             }))
-            .filter((l) => l.isError); // nur Fehlerzeilen behalten
+            .filter((l) => l.isError);
     }
 
 
