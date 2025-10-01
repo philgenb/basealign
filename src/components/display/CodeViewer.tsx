@@ -1,70 +1,81 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import hljs from "highlight.js";
-import "highlight.js/styles/github.css"; // you can swap themes
+import "highlight.js/styles/github.css"; // swap theme if you want
 
 interface CodeViewerProps {
   code: string;
   language?: string;
-  minLines?: number; // default 6–10 is nice; we'll default to 10 here
+  minLines?: number;           // pad to at least N rows
+  lines?: number[];            // 1-based line numbers to highlight
+  highlightColor?: string;     // color for the gutter box
 }
 
 export const CodeViewer: React.FC<CodeViewerProps> = ({
   code,
   language = "javascript",
-  minLines = 1,
+  minLines = 10,
+  lines,
+  highlightColor = "#FFD775",
 }) => {
   const codeRef = useRef<HTMLElement>(null);
 
-  // Split and pad to a minimum of N lines (so the row heights always look stable)
+  // Split & pad so gutter and code share the same visual row count
   const paddedLines = useMemo(() => {
     const arr = (code ?? "").split("\n");
-    if (arr.length < minLines) {
-      return [...arr, ...Array(minLines - arr.length).fill("")];
-    }
-    return arr;
+    return arr.length >= minLines ? arr : [...arr, ...Array(minLines - arr.length).fill("")];
   }, [code, minLines]);
 
-  // Render string for the code block (must match paddedLines count)
   const displayCode = useMemo(() => paddedLines.join("\n"), [paddedLines]);
+  const marked = useMemo(() => new Set((lines ?? []).filter((n) => n > 0)), [lines]);
 
-  // Re-run highlight.js when content/language changes
   useEffect(() => {
-    if (codeRef.current) {
-      hljs.highlightElement(codeRef.current);
-    }
+    if (codeRef.current) hljs.highlightElement(codeRef.current);
   }, [displayCode, language]);
 
   return (
     <div className="rounded-lg overflow-hidden bg-white">
       <div className="relative flex font-jetbrains text-sm leading-6">
-        {/* Line numbers (fixed width, same vertical rhythm) */}
-        <div className="text-[#B6B7B9] pr-4 py-4 select-none text-right tabular-nums">
-          {paddedLines.map((_, i) => (
-            <div key={i} className="leading-6 text-[#B6B7B9] font-jetbrains font-bold">
-              {i + 1}
-            </div>
-          ))}
+        {/* Gutter (line numbers) */}
+        <div className="py-4 select-none tabular-nums" style={{ width: 56 }}>
+          {paddedLines.map((_, i) => {
+            const lineNo = i + 1;
+            const isMarked = marked.has(lineNo);
+            return (
+              <div
+                key={i}
+                className="relative h-6 leading-6 flex items-center"
+                style={{ lineHeight: "1.5rem" }} // keep in sync with code lines
+                title={`Line ${lineNo}`}
+              >
+                {/* Absolute colored box INSIDE this row (aligned to this specific number) */}
+                {isMarked && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-y-0 right-1 rounded"
+                    style={{
+                      background: highlightColor,
+                      width: 37, // badge width; adjust if needed
+                      height: 22
+                    }}
+                  />
+                )}
+
+                {/* Right-aligned number; placed above the box */}
+                <div className="w-12 pr-3 text-right relative z-10">
+                  <span className={`font-bold ${isMarked ? "text-white" : "text-[#B6B7B9]"}`}>
+                    {lineNo}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Code column (single block, but normalized so it matches the numbers’ rhythm) */}
-        <pre
-          className="
-            overflow-x-auto p-4 m-0
-            whitespace-pre
-            leading-6
-            font-jetbrains
-            text-sm
-            /* Normalize highlight.js defaults on descendants */
-            [&_code.hljs]:!p-0
-            [&_code.hljs]:!m-0
-            [&_code.hljs]:!bg-transparent
-            [&_code.hljs]:!leading-6
-          "
-        >
+        {/* Code block (single pre/code like your original) */}
+        <pre className="overflow-x-auto p-4 m-0">
           <code
             ref={codeRef}
             className={`hljs ${language} text-[#707083] font-bold text-sm`}
-            // Hard override in case the theme sets display/padding/margin on code.hljs
             style={{ display: "block", padding: 0, margin: 0, lineHeight: "1.5rem" }}
           >
             {displayCode || "/* No source code provided */"}

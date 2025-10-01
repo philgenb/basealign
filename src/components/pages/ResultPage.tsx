@@ -221,7 +221,7 @@ export default function ResultPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6">
                         <div>
                             <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-2">Current</div>
-                            <CodeViewer code={sourceSnippet} />
+                            <CodeViewer code={sourceSnippet} lines={[1, 2, 6]} />
                         </div>
                         <div>
                             <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-3">Accessibility
