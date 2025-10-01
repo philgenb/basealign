@@ -6,7 +6,7 @@ import {EditorLineMobile3} from "../../assets/imageComponents/EditorLineMobile3"
 
 export const MobileBlocker: React.FC = () => {
   return (
-    <div className="flex flex-col items-center justify-start mt-28 h-screen bg-gradient-to-b from-white to-[#f3f4f6]">
+    <div className="flex flex-col items-center justify-start mt-28 h-screen bg-white">
       {/* Logo */}
      <BaseAlignIconMobile/>
 
