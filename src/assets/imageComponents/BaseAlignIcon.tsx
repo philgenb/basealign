@@ -45,7 +45,7 @@ export const BaseAlignIcon: React.FC<Props> = ({className}) => {
             <defs>
                 <filter id="filter0_d_16_2" x="0.8" y="0.8" width="92.4" height="92.4" filterUnits="userSpaceOnUse"
                         colorInterpolationFilters="sRGB">
-                    <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                    <feFlood floodOpacity="0" result="BackgroundImageFix"/>
                     <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
                                    result="hardAlpha"/>
                     <feOffset/>

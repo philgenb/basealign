@@ -4,6 +4,7 @@ import * as walk from "acorn-walk";
 import * as parse5 from "parse5";
 import data from "web-features/data.json" with {type: "json"};
 import {getStatus} from "compute-baseline";
+import jsx from "acorn-jsx";
 
 const {features: WEB_FEATURES} = data;
 
@@ -24,7 +25,7 @@ export type BaselineIssue = {
 };
 
 export type BaselineReport = {
-    inputLanguage: "css" | "html" | "js" | "jsx" | "mixed" ;
+    inputLanguage: "css" | "html" | "js" | "jsx" | "mixed";
     minLevel: BaselineMinLevel;
     issues: BaselineIssue[];
     summary: { totalChecked: number; belowMinLevel: number };
@@ -52,6 +53,8 @@ type WebFeature = {
         support?: Record<string, string>;
     };
 };
+
+const AcornJSXParser = acorn.Parser.extend(jsx());
 
 export class BaselineChecker {
     private minLevel: BaselineMinLevel;
@@ -209,10 +212,11 @@ export class BaselineChecker {
     analyzeJS(jsText: string): BaselineReport {
         let ast;
         try {
-            ast = acorn.parse(jsText, {
-                ecmaVersion: "latest",
-                locations: true
-            });
+            try {
+                ast = AcornJSXParser.parse(jsText, {ecmaVersion: "latest", sourceType: "module", locations: true});
+            } catch (err) {
+                ast = AcornJSXParser.parse(jsText, {ecmaVersion: "latest", sourceType: "script", locations: true});
+            }
         } catch (err) {
             console.warn("[Baseline] JS parse failed:", err);
             return {
@@ -227,42 +231,30 @@ export class BaselineChecker {
         const seen = new Set<string>();
         let totalChecked = 0;
 
-        // Traverse AST
         walk.simple(ast, {
             Identifier: (node: any) => {
                 const name = node.name;
-
                 const builtinBcd = `javascript.builtins.${name}`;
                 totalChecked++;
-
-                this.checkBcdKey(
-                    builtinBcd,
-                    {line: node.loc.start.line, column: node.loc.start.column},
-                    {kind: "js-builtin", property: name},
-                    issues,
-                    seen
-                );
+                this.checkBcdKey(builtinBcd, {
+                    line: node.loc.start.line,
+                    column: node.loc.start.column
+                }, {kind: "js-builtin", property: name}, issues, seen);
             },
-
             MemberExpression: (node: any) => {
-                // z.B. fetch(), localStorage, IntersectionObserver etc.
                 if (node.object && node.object.name) {
                     const obj = node.object.name;
                     const prop = node.property?.name;
                     if (prop) {
                         const apiBcd = `api.${obj}.${prop}`;
                         totalChecked++;
-
-                        this.checkBcdKey(
-                            apiBcd,
-                            {line: node.loc.start.line, column: node.loc.start.column},
-                            {kind: "js-api", property: obj, value: prop},
-                            issues,
-                            seen
-                        );
+                        this.checkBcdKey(apiBcd, {
+                            line: node.loc.start.line,
+                            column: node.loc.start.column
+                        }, {kind: "js-api", property: obj, value: prop}, issues, seen);
                     }
                 }
-            }
+            },
         });
 
         return {
@@ -272,6 +264,7 @@ export class BaselineChecker {
             summary: {totalChecked, belowMinLevel: issues.length}
         };
     }
+
 
     private checkBcdKey(
         bcdKey: string,

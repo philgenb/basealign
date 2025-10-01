@@ -67,12 +67,16 @@ const LandingPage: React.FC = () => {
                     report = analyzeHtmlString(code, minLevel);
                 }
 
-            } else if (detectedLang === "javascript") {
-                if (code.includes("<") && code.includes("/>")) {
+            } else if (detectedLang === "javascript" || detectedLang === "typescript") {
+                if (code.includes("<") && code.includes("</")) {
+                    console.log("[Baseline] detected jsx:", detectedLang);
                     report = analyzeJsxString(code, minLevel);
                 } else {
                     report = analyzeJsString(code, minLevel);
                 }
+
+            } else if (detectedLang === "jsx" || detectedLang === "tsx") {
+                report = analyzeJsxString(code, minLevel);
 
             } else {
                 report = {

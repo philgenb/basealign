@@ -1,8 +1,5 @@
-// src/lib/codeDetect.ts
-// Keep imports minimal to reduce bundle size.
 import hljs from "highlight.js/lib/core";
 
-// Register only languages you care about.
 import javascript from "highlight.js/lib/languages/javascript";
 import typescript from "highlight.js/lib/languages/typescript";
 import python from "highlight.js/lib/languages/python";
@@ -20,7 +17,6 @@ import bash from "highlight.js/lib/languages/bash";
 import yaml from "highlight.js/lib/languages/yaml";
 import markdown from "highlight.js/lib/languages/markdown";
 
-// Register languages exactly once.
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("typescript", typescript);
 hljs.registerLanguage("python", python);
@@ -68,8 +64,8 @@ const HLJS_TO_MONACO: Record<string, string> = {
 };
 
 // Options to make detection less noisy for short random text.
-const MIN_LENGTH = 12;           // Below this we don't try too hard.
-const MIN_CONFIDENCE = 0.35;     // If score is lower, fallback to plaintext.
+const MIN_LENGTH = 3;           // Below this we don't try too hard.
+const MIN_CONFIDENCE = 0.15;     // If score is lower, fallback to plaintext.
 
 /** Detect a Monaco language id using highlight.js auto-detection. */
 export function detectMonacoLanguage(text: string): string {
