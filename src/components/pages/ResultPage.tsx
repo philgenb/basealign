@@ -11,6 +11,8 @@ import {CodeViewer} from "../display/CodeViewer";
 import BaselineBG from "../../assets/Baseline_BG.webp";
 import {BackToCodeIcon} from "../../assets/imageComponents/BackToCodeIcon";
 import {DropdownIcon} from "../../assets/imageComponents/DropdownIcon";
+import {TickIcon} from "../../assets/imageComponents/TickIcon";
+import {AccessibilityBulletIcon} from "../../assets/imageComponents/AccessibilityBulletIcon";
 
 type Severity = "critical" | "moderate";
 
@@ -177,12 +179,18 @@ export default function ResultPage() {
                         <div className="flex items-start justify-between gap-4 h-full">
                             <div className="flex flex-col gap-2">
                                 <div className="text-2xl font-bold font-jakarta text-primary">
-                                    {counts.errors + counts.warnings === 0 ? (
+                                    {counts.errors === 0 ? (
+                                        <>
+                                            This code snippet already <br/> looks perfect!
+                                        </>
+                                    ) : counts.errors <= 2 ? (
                                         <>
                                             This code snippet already <br/> looks very solid!
                                         </>
                                     ) : (
-                                        "We found some opportunities to improve compatibility."
+                                        <>
+                                            We found several compatibility <br/> risks in your code.
+                                        </>
                                     )}
                                 </div>
                                 <div className="mt-4 flex items-center gap-5 text-sm">
@@ -194,16 +202,16 @@ export default function ResultPage() {
                             <div className="flex flex-col justify-between h-full items-end gap-2">
                                 <button
                                     onClick={() => navigate("/")}
-                                    className="flex flex-row gap-2 rounded-md bg-[#7B96E8] px-5 py-3 text-[13px] font-jakarta items-center justify-center tracking-normal font-bold text-white
+                                    className="flex flex-row gap-2 rounded-md bg-[#7B96E8] px-5 py-2.5 text-[13px] font-jakarta items-center justify-center tracking-normal font-bold text-white
              hover:bg-[#6887E5] transition-colors duration-200"
-                                    title="Back to Editor"
+                                    title="Editor"
                                 >
                                     <BackToCodeIcon/>
-                                    Back to Code
+                                    Editor
                                 </button>
                                 <div className="relative inline-block">
                                     <select
-                                        className="appearance-none rounded-md border border-card bg-white px-5 py-2.5 pr-12 text-sm font-bold font-jakarta text-primary
+                                        className="appearance-none rounded-lg border border-card bg-white px-5 py-2.5 pr-12 text-sm font-bold font-jakarta text-primary
              focus:outline-none focus:ring-0 focus:border-card"
                                         value={filter}
                                         onChange={(e) => setFilter(e.target.value as any)}
@@ -237,30 +245,58 @@ export default function ResultPage() {
 
                 {/* Diff-ish card */}
                 <div className="mt-6 rounded-2xl border border-card shadow-card bg-white p-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-[61%_38%] gap-6">
+                    {/* Three columns: CodeViewer, divider, Accessibility */}
+                    <div className="grid grid-cols-1 lg:grid-cols-[56%_2%_42%] gap-6">
+                        {/* Left column: CodeViewer */}
                         <div>
-                            <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-2">Current</div>
+                            <div className="text-sm font-semibold font-jetbrains text-[#3B3535] mb-2">Current</div>
                             <CodeViewer code={sourceSnippet} lines={errorLineNumbers}/>
                         </div>
+
+                        {/* Custom vertical divider */}
+                        <div className="hidden lg:flex justify-center">
+                            <div
+                                className="w-[1.6px] h-full bg-gradient-to-b from-transparent via-[#E5E7EB] to-transparent"/>
+                        </div>
+
+
+                        {/* Right column: Accessibility Score */}
                         <div>
-                            <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-3">Accessibility
-                                Score
-                            </div>
-                            <div>
-                                <AccessibilityScore score={a11yScore}/>
-                                <ul className="mt-5 list-disc pl-5 text-sm font-medium text-[#747D86] font-jakarta space-y-1">
-                                    {a11yIssues.length === 0 ? (
-                                        <li>No accessibility issues detected.</li>
-                                    ) : (
-                                        a11yIssues.map((iss, i) => <li key={i}>{iss.message}</li>)
-                                    )}
-                                </ul>
+                            <div className="text-sm font-semibold font-jetbrains text-[#3B3535] mb-3">
+                                Accessibility
                             </div>
 
+                            {a11yIssues.length === 0 ? (
+                                // Case 1: No issues
+                                <div className="flex flex-col items-center justify-center text-center mt-5">
+                                    {/* Check Icon */}
+                                    <div className="mb-3 flex items-center justify-center">
+                                        <TickIcon/>
+                                    </div>
+                                    {/* Text */}
+                                    <p className="font-jetbrains font-semibold text-sm text-[#525A71] decoration-blue-500">
+                                        Perfect as it is.
+                                    </p>
+                                </div>
+                            ) : (
+                                // Case 2: Issues list
+                                <ul className="mt-5 space-y-3 text-sm font-medium text-[#747D86] font-jakarta">
+                                    {a11yIssues.map((iss, i) => (
+                                        <li key={i} className="flex items-center gap-3">
+                                            {/* Custom bullet icon */}
+                                            <AccessibilityBulletIcon/>
+                                            {/* Issue text */}
+                                            <span>{iss.message}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
+
                     </div>
 
-                    <div className="w-full h-[1.6px] bg-gray-50"/>
+                    {/* Custom horizontal divider */}
+                    <div className="w-full h-[1.6px] mt-4 bg-gradient-to-r from-transparent via-[#E5E7EB] to-transparent"/>
 
 
                     {/* Infringement + Problematic with */}

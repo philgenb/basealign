@@ -13,7 +13,7 @@ interface CodeViewerProps {
 export const CodeViewer: React.FC<CodeViewerProps> = ({
                                                           code,
                                                           language = "javascript",
-                                                          minLines = 2,
+                                                          minLines = 3,
                                                           lines,
                                                           highlightColor = "#FFD775",
                                                       }) => {
@@ -30,7 +30,6 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
 
     useEffect(() => {
         if (codeRef.current) {
-            // vorheriges "data-highlighted" entfernen
             codeRef.current.removeAttribute("data-highlighted");
             hljs.highlightElement(codeRef.current);
         }
