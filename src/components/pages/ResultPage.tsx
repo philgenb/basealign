@@ -8,7 +8,7 @@ import {IssueBadge} from "../results/IssueBadge";
 import {analyzeAccessibility} from "../../lib/analyzeAccesibility";
 import {AccessibilityScore} from "../results/AccessibilityScore";
 import {CodeViewer} from "../display/CodeViewer";
-import BaselineBG from "../../assets/Baseline_BG.png";
+import BaselineBG from "../../assets/Baseline_BG.webp";
 
 type Severity = "critical" | "moderate";
 
@@ -230,7 +230,7 @@ export default function ResultPage() {
 
                 {/* Diff-ish card */}
                 <div className="mt-6 rounded-2xl border border-card shadow-card bg-white p-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-[61%_38%] gap-6">
                         <div>
                             <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-2">Current</div>
                             <CodeViewer code={sourceSnippet} lines={errorLineNumbers} />

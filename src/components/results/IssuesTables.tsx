@@ -19,10 +19,10 @@ function SeverityBadge({ s }: { s: Severity }) {
 /** Table showing all scored issues. Pure presentational component. */
 export const IssuesTable: React.FC<{ issues: ScoredIssue[] }> = ({ issues }) => {
   return (
-    <div className="mt-8 overflow-hidden rounded-xl border border-card bg-white shadow-card">
+    <div className="mt-8 overflow-hidden rounded-xl border font-jakarta border-card bg-white shadow-card">
       <table className="min-w-full text-left text-sm">
-        <thead className="bg-slate-50/80">
-          <tr className="text-slate-600">
+        <thead className="bg-[#FAFAFA]">
+          <tr className="text-[#3B3535]">
             <th className="px-4 py-3 font-semibold">Severity</th>
             <th className="px-4 py-3 font-semibold">Location</th>
             <th className="px-4 py-3 font-semibold">Kind</th>
@@ -37,13 +37,13 @@ export const IssuesTable: React.FC<{ issues: ScoredIssue[] }> = ({ issues }) => 
         <tbody>
           {issues.length === 0 ? (
             <tr>
-              <td colSpan={9} className="px-4 py-6 text-center text-slate-500">
+              <td colSpan={9} className="px-4 py-6 text-center text-[#747D86]">
                 No issues found below the chosen minimum baseline.
               </td>
             </tr>
           ) : (
             issues.map((iss, i) => (
-              <tr key={`${iss.bcdKey}-${iss.loc?.line}-${iss.loc?.column}-${i}`} className="border-t">
+              <tr key={`${iss.bcdKey}-${iss.loc?.line}-${iss.loc?.column}-${i}`} className="border-t border-[#F5F5F5]">
                 <td className="px-4 py-2 align-top">
                   <SeverityBadge s={iss.severity} />
                 </td>

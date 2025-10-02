@@ -3,7 +3,7 @@ import {BaseAlignIconMobile} from "../../assets/imageComponents/BaseAlignIconMob
 import {EditorLineMobile1} from "../../assets/imageComponents/EditorLineMobile1";
 import {EditorLineMobile2} from "../../assets/imageComponents/EditorLineMobile2";
 import {EditorLineMobile3} from "../../assets/imageComponents/EditorLineMobile3";
-import BaselineMobileBG from "../../assets/BaselineMobileBG.png";
+import BaselineMobileBG from "../../assets/BaselineMobileBG.webp";
 
 export const MobileBlocker: React.FC = () => {
   return (

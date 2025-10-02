@@ -5,6 +5,11 @@
   font-family: 'Montserrat', 'Outfit', sans-serif;
 }
 
+html, body {
+  overscroll-behavior: none;
+}
+
+
 @theme {
   /* Fonts */
   --font-jakarta: "Plus Jakarta Sans", sans-serif;
