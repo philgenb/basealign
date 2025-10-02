@@ -9,6 +9,7 @@ import {analyzeAccessibility} from "../../lib/analyzeAccesibility";
 import {AccessibilityScore} from "../results/AccessibilityScore";
 import {CodeViewer} from "../display/CodeViewer";
 import BaselineBG from "../../assets/Baseline_BG.webp";
+import {BackToCodeIcon} from "../../assets/imageComponents/BackToCodeIcon";
 
 type Severity = "critical" | "moderate";
 
@@ -158,7 +159,7 @@ export default function ResultPage() {
 
     return (
         <div className="min-h-screen w-full bg-no-repeat bg-cover bg-center bg-fixed"
-             style={{ backgroundImage: `url(${BaselineBG})` }}
+             style={{backgroundImage: `url(${BaselineBG})`}}
         >
             <div className="max-w-6xl mx-auto px-6 py-16">
                 {/* Top header */}
@@ -166,19 +167,13 @@ export default function ResultPage() {
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight font-jakarta text-primary">Analysis</h1>
                     </div>
-                    <button
-                        onClick={() => navigate("/")}
-                        className="shrink-0 rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
-                    >
-                        Back to Editor
-                    </button>
                 </div>
 
                 {/* Cards row */}
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Left card: message + counts + filter + copy */}
                     <div className="md:col-span-2 rounded-2xl border border-card shadow-card bg-white  py-8 px-10">
-                        <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start justify-between gap-4 h-full">
                             <div className="flex flex-col gap-2">
                                 <div className="text-2xl font-bold font-jakarta text-primary">
                                     {counts.errors + counts.warnings === 0 ? (
@@ -195,13 +190,15 @@ export default function ResultPage() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col justify-between h-full items-end gap-2">
                                 <button
-                                    onClick={copySnippet}
-                                    className="rounded-md border border-card shadow-card bg-slate-50 px-3 py-2 text-xs font-semibold hover:bg-slate-100"
-                                    title="Copy code"
+                                    onClick={() => navigate("/")}
+                                    className="flex flex-row gap-2 rounded-md bg-[#7B96E8] px-5 py-3 text-[13px] font-jakarta items-center justify-center tracking-normal font-bold text-white
+             hover:bg-[#6887E5] transition-colors duration-200"
+                                    title="Back to Editor"
                                 >
-                                    Code
+                                    <BackToCodeIcon/>
+                                    Back to Code
                                 </button>
                                 <select
                                     className="rounded-md border border-card shadow-card bg-white px-3 py-2 text-xs"
@@ -233,7 +230,7 @@ export default function ResultPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-[61%_38%] gap-6">
                         <div>
                             <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-2">Current</div>
-                            <CodeViewer code={sourceSnippet} lines={errorLineNumbers} />
+                            <CodeViewer code={sourceSnippet} lines={errorLineNumbers}/>
                         </div>
                         <div>
                             <div className="text-sm font-semibold font-jetbrains text-[#AEAEAE] mb-3">Accessibility
