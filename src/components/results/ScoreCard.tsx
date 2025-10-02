@@ -42,7 +42,7 @@ export const ScoreCard: React.FC<ScoreCardProps> = ({
     const bg = `conic-gradient(${stops.join(", ")})`;
 
     return (
-        <div className="p-6 bg-white font-jakarta font-extrabold tracking-tighter rounded-2xl border px-10 gap-2 border-card shadow-card flex flex-col items-start">
+        <div className="bg-white font-jakarta font-extrabold tracking-tighter rounded-2xl border px-16 py-8 gap-2 border-card shadow-card flex flex-col items-start">
             <div className="text-[#D7D7D7] font-extrabold text-lg mb-2">Overall Score</div>
             <div className="flex items-center gap-4">
                 {/* Donut chart */}
