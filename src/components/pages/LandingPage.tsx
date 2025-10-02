@@ -1,7 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import {BaseAlignIcon} from "../../assets/imageComponents/BaseAlignIcon";
 import {CodeEditorMonaco} from "../input/CodeDetailedEditor";
-import {useIsMac} from "../../hooks/useIsMac";
 import {AppleKeyIcon} from "../../assets/imageComponents/AppleKeyIcon";
 import {VKeyIcon} from "../../assets/imageComponents/VKeyIcon";
 import {AnalyseIcon} from "../../assets/imageComponents/AnalyseIcon";
@@ -18,7 +17,6 @@ import BaselineBG from "../../assets/Baseline_BG.png";
 const LandingPage: React.FC = () => {
     const [code, setCode] = useState<string>("");
     const [expanded, setExpanded] = useState<boolean>(false);
-    const isMac = useIsMac();
     const editorApiRef = useRef<{ focus: () => void } | null>(null);
     const navigate = useNavigate();
     const [minLevel] = useState<BaselineMinLevel>("high");

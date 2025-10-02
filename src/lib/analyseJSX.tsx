@@ -399,24 +399,3 @@ export function analyzeJsxString(
     summary: { totalChecked, belowMinLevel: allIssues.length },
   };
 }
-
-/** Demo component with a non-baseline property to assert extraction works */
-export const AnimatedArticle = () => {
-  return (
-    <article>
-      <style>
-        {`
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-          .article {
-            animation: fadeIn 1s linear;
-            animation-timeline: scroll(root);
-          }
-        `}
-      </style>
-      <div className="article">Hello world with scroll animation</div>
-    </article>
-  );
-};

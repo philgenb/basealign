@@ -5,7 +5,7 @@ import {IssuesTable, type ScoredIssue} from "../results/IssuesTables";
 import {ScoreCard} from "../results/ScoreCard";
 import {BrowserBadge} from "../results/BrowserBadge";
 import {IssueBadge} from "../results/IssueBadge";
-import {analyzeAccessibility, analyzeAccessibilityWithAxe} from "../../lib/analyzeAccesibility";
+import {analyzeAccessibilityWithAxe} from "../../lib/analyzeAccesibility";
 import {CodeViewer} from "../display/CodeViewer";
 import BaselineBG from "../../assets/Baseline_BG.webp";
 import {BackToCodeIcon} from "../../assets/imageComponents/BackToCodeIcon";
@@ -13,9 +13,6 @@ import {DropdownIcon} from "../../assets/imageComponents/DropdownIcon";
 import {TickIcon} from "../../assets/imageComponents/TickIcon";
 import {AccessibilityBulletIcon} from "../../assets/imageComponents/AccessibilityBulletIcon";
 import {BaseAlignIcon} from "../../assets/imageComponents/BaseAlignIcon";
-import {EditorLine1} from "../../assets/imageComponents/EditorLine1";
-import {EditorLine2} from "../../assets/imageComponents/EditorLine2";
-import {EditorLine3} from "../../assets/imageComponents/EditorLine3";
 
 type Severity = "critical" | "moderate";
 
@@ -281,24 +278,14 @@ export default function ResultPage() {
                         </div>
 
 
-                        {/* Right column: Accessibility Score */}
+                        {/* Right column: Accessibility Analysis */}
                         <div>
                             <div className="text-sm font-semibold font-jetbrains text-[#3B3535] mb-3">
                                 Accessibility
                             </div>
 
-                            {/* Wrapper to overlap skeleton + real content */}
                             <div className="relative min-h-[80px]">
-                                {/* Skeleton shown only while loading */}
-                                {/*{a11yLoading && (*/}
-                                {/*    <div className="absolute inset-0 mt-5 space-y-3 animate-pulse">*/}
-                                {/*        <div className="flex items-center gap-3"><EditorLine1/></div>*/}
-                                {/*        <div className="flex items-center gap-3"><EditorLine2/></div>*/}
-                                {/*        <div className="flex items-center gap-3"><EditorLine3/></div>*/}
-                                {/*    </div>*/}
-                                {/*)}*/}
-
-                                {/* Real content, always rendered but blurred until loaded */}
+                                {/* content, blurred until loaded */}
                                 <div
                                     className={`transition-all duration-300 ${
                                         a11yLoading ? "blur-sm opacity-0" : "blur-0 opacity-100"

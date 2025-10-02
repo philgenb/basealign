@@ -280,7 +280,6 @@ export class BaselineChecker {
             if (featureId) {
                 status = getStatus(featureId, bcdKey) as ComputeBaselineStatus;
             } else {
-                // Some keys may not map to a feature id
                 const fid = featureId ?? "";
                 status = getStatus(fid, bcdKey) as ComputeBaselineStatus;
             }

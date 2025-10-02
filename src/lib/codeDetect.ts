@@ -9,7 +9,7 @@ import cpp from "highlight.js/lib/languages/cpp";
 import csharp from "highlight.js/lib/languages/csharp";
 import rust from "highlight.js/lib/languages/rust";
 import sql from "highlight.js/lib/languages/sql";
-import xml from "highlight.js/lib/languages/xml";       // html/xml/svg variants
+import xml from "highlight.js/lib/languages/xml";
 import css from "highlight.js/lib/languages/css";
 import php from "highlight.js/lib/languages/php";
 import json from "highlight.js/lib/languages/json";
@@ -88,7 +88,6 @@ export function detectMonacoLanguage(text: string): string {
     if (monacoId) return monacoId;
 
     // Sometimes highlight.js returns aliases like 'xml' for html
-    // Try to normalize a few common cases:
     if (name === "xml") return "html";
     if (name === "shell") return "shell";
   }
