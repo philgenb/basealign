@@ -6,13 +6,13 @@ import {ScoreCard} from "../results/ScoreCard";
 import {BrowserBadge} from "../results/BrowserBadge";
 import {IssueBadge} from "../results/IssueBadge";
 import {analyzeAccessibility} from "../../lib/analyzeAccesibility";
-import {AccessibilityScore} from "../results/AccessibilityScore";
 import {CodeViewer} from "../display/CodeViewer";
 import BaselineBG from "../../assets/Baseline_BG.webp";
 import {BackToCodeIcon} from "../../assets/imageComponents/BackToCodeIcon";
 import {DropdownIcon} from "../../assets/imageComponents/DropdownIcon";
 import {TickIcon} from "../../assets/imageComponents/TickIcon";
 import {AccessibilityBulletIcon} from "../../assets/imageComponents/AccessibilityBulletIcon";
+import {BaseAlignIcon} from "../../assets/imageComponents/BaseAlignIcon";
 
 type Severity = "critical" | "moderate";
 
@@ -166,7 +166,8 @@ export default function ResultPage() {
         >
             <div className="max-w-6xl mx-auto px-6 py-16">
                 {/* Top header */}
-                <div className="flex items-start justify-between gap-4">
+                <div className="relative flex items-center gap-4">
+                    <BaseAlignIcon className="-ml-26"/>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight font-jakarta text-primary">Analysis</h1>
                     </div>
