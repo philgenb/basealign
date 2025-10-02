@@ -42,20 +42,23 @@ export const ScoreCard: React.FC<ScoreCardProps> = ({
     const bg = `conic-gradient(${stops.join(", ")})`;
 
     return (
-        <div className="bg-white font-jakarta font-extrabold tracking-tighter rounded-2xl border px-16 py-8 gap-2 border-card shadow-card flex flex-col items-start">
-            <div className="text-[#D7D7D7] font-extrabold text-lg mb-2">Overall Score</div>
-            <div className="flex items-center gap-4">
-                {/* Donut chart */}
-                <div
-                    className="h-14 w-14 rounded-full flex items-center justify-center"
-                    style={{background: bg}}
-                >
-                    <div className="h-6 w-6 bg-white rounded-full"/>
-                </div>
-                {/* Animated score */}
-                <div className="text-5xl text-[#202122]">
-                    {animated}
-                    <span className="ml-1 text-4xl text-[#D7D7D7]">%</span>
+        <div
+            className="bg-white font-jakarta font-extrabold tracking-tighter rounded-2xl border px-16 py-8 border-card shadow-card flex flex-col items-center">
+            <div className="flex flex-col gap-2">
+                <div className="text-[#D7D7D7] font-bold text-lg mb-2">Overall Score</div>
+                <div className="flex items-center gap-4">
+                    {/* Donut chart */}
+                    <div
+                        className="h-14 w-14 rounded-full flex items-center justify-center"
+                        style={{background: bg}}
+                    >
+                        <div className="h-6 w-6 bg-white rounded-full"/>
+                    </div>
+                    {/* Animated score */}
+                    <div className="text-5xl text-[#202122]">
+                        {animated}
+                        <span className="ml-1 text-4xl text-[#D7D7D7]">%</span>
+                    </div>
                 </div>
             </div>
         </div>

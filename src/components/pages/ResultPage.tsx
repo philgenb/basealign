@@ -249,7 +249,7 @@ export default function ResultPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-[56%_2%_42%] gap-6">
                         {/* Left column: CodeViewer */}
                         <div>
-                            <div className="text-sm font-semibold font-jetbrains text-[#3B3535] mb-2">Current</div>
+                            <div className="text-sm font-semibold font-jetbrains text-[#3B3535] mb-1">Current</div>
                             <CodeViewer code={sourceSnippet} lines={errorLineNumbers}/>
                         </div>
 
