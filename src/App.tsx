@@ -8,7 +8,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-transparent">
       {/* Mobile-Only */}
-      <div className="block md:hidden bg-white">
+      <div className="block md:hidden h-screen overflow-hidden bg-white">
         <MobileBlocker />
       </div>
 

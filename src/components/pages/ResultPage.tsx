@@ -8,6 +8,7 @@ import {IssueBadge} from "../results/IssueBadge";
 import {analyzeAccessibility} from "../../lib/analyzeAccesibility";
 import {AccessibilityScore} from "../results/AccessibilityScore";
 import {CodeViewer} from "../display/CodeViewer";
+import BaselineBG from "../../assets/Baseline_BG.png";
 
 type Severity = "critical" | "moderate";
 
@@ -156,7 +157,9 @@ export default function ResultPage() {
     );
 
     return (
-        <div className="min-h-screen w-full bg-gradient-to-b from-white to-slate-50">
+        <div className="min-h-screen w-full bg-no-repeat bg-cover bg-center bg-fixed"
+             style={{ backgroundImage: `url(${BaselineBG})` }}
+        >
             <div className="max-w-6xl mx-auto px-6 py-16">
                 {/* Top header */}
                 <div className="flex items-start justify-between gap-4">

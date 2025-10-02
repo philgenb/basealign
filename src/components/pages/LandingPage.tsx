@@ -13,6 +13,7 @@ import {analyzeHtmlString} from "../../lib/analyseHTML";
 import {analyzeJsString} from "../../lib/analyseJavaScript";
 import {analyzeMixedString} from "../../lib/analyseMixed";
 import {analyzeJsxString} from "../../lib/analyseJSX";
+import BaselineBG from "../../assets/Baseline_BG.png";
 
 const LandingPage: React.FC = () => {
     const [code, setCode] = useState<string>("");
@@ -98,7 +99,10 @@ const LandingPage: React.FC = () => {
 
     return (
         <div
-            className="min-h-screen w-full bg-[radial-gradient(80%_60%_at_50%_0%,#eef2ff_0%,#f8fafc_40%,#ffffff_100%)] bg-no-repeat bg-fixed">
+            className="min-h-screen w-full bg-no-repeat bg-cover bg-center bg-fixed"
+            style={{ backgroundImage: `url(${BaselineBG})` }}
+        >
+
             <div className="px-4 sm:px-6 lg:px-8 py-14">
                 <motion.div
                     layout

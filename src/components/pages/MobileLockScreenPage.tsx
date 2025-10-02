@@ -3,10 +3,13 @@ import {BaseAlignIconMobile} from "../../assets/imageComponents/BaseAlignIconMob
 import {EditorLineMobile1} from "../../assets/imageComponents/EditorLineMobile1";
 import {EditorLineMobile2} from "../../assets/imageComponents/EditorLineMobile2";
 import {EditorLineMobile3} from "../../assets/imageComponents/EditorLineMobile3";
+import BaselineMobileBG from "../../assets/BaselineMobileBG.png";
 
 export const MobileBlocker: React.FC = () => {
   return (
-    <div className="flex flex-col items-center justify-start mt-28 h-screen bg-white">
+    <div className="flex flex-col items-center justify-start mt-28 h-screen bg-no-repeat bg-cover bg-center bg-fixed"
+         style={{ backgroundImage: `url(${BaselineMobileBG})` }}
+    >
       {/* Logo */}
      <BaseAlignIconMobile/>
 
