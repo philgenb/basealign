@@ -267,11 +267,11 @@ export const CodeEditorMonaco: React.FC<CodeEditorProps> = ({
                     </div>
 
                     {/* Footer */}
-                    <div className="px-7 pb-8">
+                    <div className="px-12 pb-8">
                         <div className="flex items-center justify-between">
                             <div className="flex gap-2 tracking-tight font-extrabold font-mono text-xs text-[#525A71]">
                                 <LanguageIcon/>
-                                <span className="font-medium text-black/80">{detectedLang}</span>
+                                <span className="font-semibold text-[#525A71]">{detectedLang}</span>
                             </div>
                         </div>
                     </div>

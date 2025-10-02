@@ -182,12 +182,12 @@ const LandingPage: React.FC = () => {
                                 animate={{opacity: 1, scale: 1, y: 0}}
                                 exit={{opacity: 0, scale: 0.6, y: 10}}
                                 transition={{type: "spring", stiffness: 300, damping: 25}}
-                                className="absolute right-6 bottom-6"
+                                className="absolute right-11 bottom-9"
                             >
                                 <button
                                     type="button"
                                     onClick={onAnalyze}
-                                    className="inline-flex gap-2 items-center rounded-md bg-[#7B96E8] px-6 py-2 text-base font-bold text-white hover:bg-[#6887E5] active:scale-[0.97] transition"
+                                    className="inline-flex gap-2 items-center rounded-md bg-[#7B96E8] px-7 py-2.5 text-base font-semibold text-white hover:bg-[#6887E5] active:scale-[0.97] transition"
                                 >
                                     <AnalyseIcon/>
                                     Analyze
