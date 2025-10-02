@@ -1,11 +1,11 @@
-import React, {useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import type {BaselineIssue, BaselineReport} from "../../lib/BaseLineChecker";
 import {IssuesTable, type ScoredIssue} from "../results/IssuesTables";
 import {ScoreCard} from "../results/ScoreCard";
 import {BrowserBadge} from "../results/BrowserBadge";
 import {IssueBadge} from "../results/IssueBadge";
-import {analyzeAccessibility} from "../../lib/analyzeAccesibility";
+import {analyzeAccessibility, analyzeAccessibilityWithAxe} from "../../lib/analyzeAccesibility";
 import {CodeViewer} from "../display/CodeViewer";
 import BaselineBG from "../../assets/Baseline_BG.webp";
 import {BackToCodeIcon} from "../../assets/imageComponents/BackToCodeIcon";
@@ -13,6 +13,9 @@ import {DropdownIcon} from "../../assets/imageComponents/DropdownIcon";
 import {TickIcon} from "../../assets/imageComponents/TickIcon";
 import {AccessibilityBulletIcon} from "../../assets/imageComponents/AccessibilityBulletIcon";
 import {BaseAlignIcon} from "../../assets/imageComponents/BaseAlignIcon";
+import {EditorLine1} from "../../assets/imageComponents/EditorLine1";
+import {EditorLine2} from "../../assets/imageComponents/EditorLine2";
+import {EditorLine3} from "../../assets/imageComponents/EditorLine3";
 
 type Severity = "critical" | "moderate";
 
@@ -65,10 +68,35 @@ export default function ResultPage() {
 
     const {report, sourceSnippet = ""} = state;
 
-    const {issues: a11yIssues, score: a11yScore} = useMemo(
-        () => analyzeAccessibility(sourceSnippet),
-        [sourceSnippet]
-    );
+    const [a11yIssues, setA11yIssues] = useState<any[]>([]);
+    const [a11yScore, setA11yScore] = useState<number>(100);
+    const [a11yLoading, setA11yLoading] = useState(true);
+
+    useEffect(() => {
+        if (!sourceSnippet) return;
+
+        let cancelled = false;
+        setA11yLoading(true);
+
+        (async () => {
+            try {
+                const {issues, score} = await analyzeAccessibilityWithAxe(sourceSnippet);
+                if (!cancelled) {
+                    setA11yIssues(issues);
+                    setA11yScore(score);
+                }
+            } catch (err) {
+                console.error("axe-core failed:", err);
+            } finally {
+                if (!cancelled) setA11yLoading(false);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [sourceSnippet]);
+
 
     // Score issues and sort
     const scoredAll: ScoredIssue[] = useMemo(
@@ -146,14 +174,6 @@ export default function ResultPage() {
             return `${label} — ${i.bcdKey}`;
         });
     }, [scoredAll]);
-
-    const copySnippet = async () => {
-        try {
-            await navigator.clipboard.writeText(sourceSnippet);
-        } catch {
-            // no-op
-        }
-    };
 
     const errorLines = useMemo(
         () => getErrorLines(sourceSnippet, scoredAll),
@@ -267,37 +287,51 @@ export default function ResultPage() {
                                 Accessibility
                             </div>
 
-                            {a11yIssues.length === 0 ? (
-                                // Case 1: No issues
-                                <div className="flex flex-col items-center justify-center text-center mt-5">
-                                    {/* Check Icon */}
-                                    <div className="mb-3 flex items-center justify-center">
-                                        <TickIcon/>
-                                    </div>
-                                    {/* Text */}
-                                    <p className="font-jetbrains font-semibold text-sm text-[#525A71] decoration-blue-500">
-                                        Perfect as it is.
-                                    </p>
+                            {/* Wrapper to overlap skeleton + real content */}
+                            <div className="relative min-h-[80px]">
+                                {/* Skeleton shown only while loading */}
+                                {/*{a11yLoading && (*/}
+                                {/*    <div className="absolute inset-0 mt-5 space-y-3 animate-pulse">*/}
+                                {/*        <div className="flex items-center gap-3"><EditorLine1/></div>*/}
+                                {/*        <div className="flex items-center gap-3"><EditorLine2/></div>*/}
+                                {/*        <div className="flex items-center gap-3"><EditorLine3/></div>*/}
+                                {/*    </div>*/}
+                                {/*)}*/}
+
+                                {/* Real content, always rendered but blurred until loaded */}
+                                <div
+                                    className={`transition-all duration-300 ${
+                                        a11yLoading ? "blur-sm opacity-0" : "blur-0 opacity-100"
+                                    }`}
+                                >
+                                    {a11yIssues.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center text-center mt-7">
+                                            <div className="mb-3 flex items-center justify-center">
+                                                <TickIcon/>
+                                            </div>
+                                            <p className="font-jetbrains font-semibold text-sm text-[#525A71]">
+                                                Perfect as it is.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <ul className="mt-5 space-y-3 text-sm font-medium text-[#747D86] pr-5 font-jakarta">
+                                            {a11yIssues.map((iss, i) => (
+                                                <li key={i} className="flex items-center gap-3">
+                                                    <AccessibilityBulletIcon/>
+                                                    <span>{iss.message}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
                                 </div>
-                            ) : (
-                                // Case 2: Issues list
-                                <ul className="mt-5 space-y-3 text-sm font-medium text-[#747D86] font-jakarta">
-                                    {a11yIssues.map((iss, i) => (
-                                        <li key={i} className="flex items-center gap-3">
-                                            {/* Custom bullet icon */}
-                                            <AccessibilityBulletIcon/>
-                                            {/* Issue text */}
-                                            <span>{iss.message}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
+                            </div>
                         </div>
 
                     </div>
 
                     {/* Custom horizontal divider */}
-                    <div className="w-full h-[1.6px] mt-4 bg-gradient-to-r from-transparent via-[#E5E7EB] to-transparent"/>
+                    <div
+                        className="w-full h-[1.6px] mt-4 bg-gradient-to-r from-transparent via-[#E5E7EB] to-transparent"/>
 
 
                     {/* Infringement + Problematic with */}
