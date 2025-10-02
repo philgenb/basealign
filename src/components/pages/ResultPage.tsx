@@ -10,6 +10,7 @@ import {AccessibilityScore} from "../results/AccessibilityScore";
 import {CodeViewer} from "../display/CodeViewer";
 import BaselineBG from "../../assets/Baseline_BG.webp";
 import {BackToCodeIcon} from "../../assets/imageComponents/BackToCodeIcon";
+import {DropdownIcon} from "../../assets/imageComponents/DropdownIcon";
 
 type Severity = "critical" | "moderate";
 
@@ -200,16 +201,25 @@ export default function ResultPage() {
                                     <BackToCodeIcon/>
                                     Back to Code
                                 </button>
-                                <select
-                                    className="rounded-md border border-card shadow-card bg-white px-3 py-2 text-xs"
-                                    value={filter}
-                                    onChange={(e) => setFilter(e.target.value as any)}
-                                    title="Filter issues"
-                                >
-                                    <option value="all">All</option>
-                                    <option value="errors">Errors</option>
-                                    <option value="warnings">Warnings</option>
-                                </select>
+                                <div className="relative inline-block">
+                                    <select
+                                        className="appearance-none rounded-md border border-card bg-white px-5 py-2.5 pr-12 text-sm font-bold font-jakarta text-primary
+             focus:outline-none focus:ring-0 focus:border-card"
+                                        value={filter}
+                                        onChange={(e) => setFilter(e.target.value as any)}
+                                        title="Filter issues"
+                                    >
+                                        <option value="all">All</option>
+                                        <option value="errors">Errors</option>
+                                        <option value="warnings">Warnings</option>
+                                    </select>
+
+                                    <span
+                                        className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-primary">
+                                        <DropdownIcon/>
+                                    </span>
+                                </div>
+
                             </div>
                         </div>
                     </div>
