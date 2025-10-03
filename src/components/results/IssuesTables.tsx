@@ -22,7 +22,7 @@ export const IssuesTable: React.FC<{ issues: ScoredIssue[] }> = ({issues}) => {
     return (
         <div className="mt-8 overflow-x-auto rounded-xl border font-jakarta border-card bg-white shadow-card">
             <table className="min-w-full text-left text-sm">
-                <thead className="bg-[#FAFAFA]">
+                <thead className="bg-[#FAFAFA] ">
                 <tr className="text-[#3B3535]">
                     <th className="px-4 py-3 font-semibold">Severity</th>
                     <th className="px-4 py-3 font-semibold">Location</th>

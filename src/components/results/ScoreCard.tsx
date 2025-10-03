@@ -55,9 +55,9 @@ export const ScoreCard: React.FC<ScoreCardProps> = ({
                         <div className="h-6 w-6 bg-white rounded-full"/>
                     </div>
                     {/* Animated score */}
-                    <div className="text-5xl text-[#202122]">
+                    <div className="text-[54px] text-[#202122]">
                         {animated}
-                        <span className="ml-1 text-4xl text-[#D7D7D7]">%</span>
+                        <span className="ml-1 text-[40px] text-[#D7D7D7]">%</span>
                     </div>
                 </div>
             </div>
