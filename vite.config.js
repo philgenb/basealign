@@ -51,7 +51,7 @@ export default defineConfig({
         manualChunks: {
           react: ["react", "react-dom"],
           monaco: ["@monaco-editor/react"],
-          parser: ["@babel/parser", "parse5", "csstree", "axe-core"],
+          parser: ["@babel/parser", "parse5", "css-tree", "axe-core"],
         },
         // ---- ✨ File naming & caching ----
         entryFileNames: "assets/[name]-[hash].js",
