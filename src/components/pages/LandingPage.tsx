@@ -4,15 +4,10 @@ import {CodeEditorMonaco} from "../input/CodeDetailedEditor";
 import {AppleKeyIcon} from "../../assets/imageComponents/AppleKeyIcon";
 import {VKeyIcon} from "../../assets/imageComponents/VKeyIcon";
 import {AnalyseIcon} from "../../assets/imageComponents/AnalyseIcon";
-import {analyzeCssString} from "../../lib/analyseCSS";
 import {useNavigate} from "react-router-dom";
 import type {BaselineMinLevel} from "../../lib/BaseLineChecker";
 import {motion} from "motion/react";
-import {analyzeHtmlString} from "../../lib/analyseHTML";
-import {analyzeJsString} from "../../lib/analyseJavaScript";
-import {analyzeMixedString} from "../../lib/analyseMixed";
-import {analyzeJsxString} from "../../lib/analyseJSX";
-import BaselineBG from "../../assets/Baseline_BG.png";
+import BaselineBG from "../../assets/Baseline_BG.webp";
 
 const LandingPage: React.FC = () => {
     const [code, setCode] = useState<string>("");
@@ -50,31 +45,37 @@ const LandingPage: React.FC = () => {
         return () => window.removeEventListener("paste", onGlobalPaste);
     }, []);
 
-    const onAnalyze = () => {
+    const onAnalyze = async () => {
         try {
             let report;
 
             console.log("[Baseline] detected language:", detectedLang);
 
             if (detectedLang === "css") {
+                const {analyzeCssString} = await import("../../lib/analyseCSS");
                 report = analyzeCssString(code, minLevel);
 
             } else if (detectedLang === "html") {
                 if (code.includes("<style") || code.includes("<script")) {
+                    const {analyzeMixedString} = await import("../../lib/analyseMixed");
                     report = analyzeMixedString(code, minLevel);
                 } else {
+                    const {analyzeHtmlString} = await import("../../lib/analyseHTML");
                     report = analyzeHtmlString(code, minLevel);
                 }
 
             } else if (detectedLang === "javascript" || detectedLang === "typescript") {
                 if (code.includes("<") && code.includes("</")) {
                     console.log("[Baseline] detected jsx:", detectedLang);
+                    const {analyzeJsxString} = await import("../../lib/analyseJSX");
                     report = analyzeJsxString(code, minLevel);
                 } else {
+                    const {analyzeJsString} = await import("../../lib/analyseJavaScript");
                     report = analyzeJsString(code, minLevel);
                 }
 
             } else if (detectedLang === "jsx" || detectedLang === "tsx") {
+                const {analyzeJsxString} = await import("../../lib/analyseJSX");
                 report = analyzeJsxString(code, minLevel);
 
             } else {
@@ -98,7 +99,7 @@ const LandingPage: React.FC = () => {
     return (
         <div
             className="min-h-screen w-full bg-no-repeat bg-cover bg-center bg-fixed"
-            style={{ backgroundImage: `url(${BaselineBG})` }}
+            style={{backgroundImage: `url(${BaselineBG})`}}
         >
 
             <div className="px-4 sm:px-6 lg:px-8 py-14">
