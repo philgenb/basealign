@@ -30,6 +30,7 @@
     "web-features": "^3.1.0"
   },
   "devDependencies": {
+    "@babel/plugin-transform-react-constant-elements": "^7.27.1",
     "@eslint/js": "^9.36.0",
     "@types/css-tree": "^2.3.10",
     "@types/react": "^19.1.13",
